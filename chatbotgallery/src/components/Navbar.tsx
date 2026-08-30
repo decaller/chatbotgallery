@@ -8,6 +8,7 @@ interface NavbarProps {
   onSearchChange: (query: string) => void
   onOpenCreateModal: () => void
   totalBots: number
+  onGoHome?: () => void
 }
 
 export function Navbar({
@@ -15,6 +16,7 @@ export function Navbar({
   onSearchChange,
   onOpenCreateModal,
   totalBots,
+  onGoHome,
 }: NavbarProps) {
   const { resolvedTheme, setTheme } = useTheme()
 
@@ -26,8 +28,13 @@ export function Navbar({
     <header className="sticky top-0 z-30 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-8">
         {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
+        <button
+          type="button"
+          onClick={onGoHome}
+          className="flex items-center gap-3 text-left hover:opacity-85 transition-opacity cursor-pointer group"
+          title="Back to Homepage / Gallery"
+        >
+          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs group-hover:scale-105 transition-transform">
             <BotIcon className="size-5" />
           </div>
           <div>
@@ -41,7 +48,7 @@ export function Navbar({
               Community AI & REST API Chatbots
             </p>
           </div>
-        </div>
+        </button>
 
         {/* Search & Actions */}
         <div className="flex items-center gap-3">

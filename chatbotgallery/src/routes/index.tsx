@@ -11,7 +11,17 @@ import { Button } from "@/components/ui/button"
 import type { Bot, BotVersion } from "@/types/bot"
 import { Plus, Server } from "lucide-react"
 
+interface IndexSearchParams {
+  bot?: string
+}
+
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>): IndexSearchParams => {
+    return {
+      bot: typeof search.bot === "string" && search.bot.trim() !== "" ? search.bot.trim() : undefined,
+    }
+  },
+  loaderDeps: ({ search: { bot } }) => ({ bot }),
   loader: async () => {
     try {
       const bots = await getBotsFn()
@@ -25,8 +35,11 @@ export const Route = createFileRoute("/")({
 
 function IndexPage() {
   const { initialBots } = Route.useLoaderData()
+  const { bot: selectedBotId } = Route.useSearch()
+  const navigate = Route.useNavigate()
+
   const [bots, setBots] = useState<Bot[]>(initialBots || [])
-  const [activeBot, setActiveBot] = useState<Bot | null>(null)
+  const [historicalBot, setHistoricalBot] = useState<Bot | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -37,15 +50,28 @@ function IndexPage() {
   const [botForTimeline, setBotForTimeline] = useState<Bot | null>(null)
   const [isTimelineOpen, setIsTimelineOpen] = useState(false)
 
+  // Derived activeBot
+  const baseActiveBot = selectedBotId ? bots.find((b) => b.id === selectedBotId) || null : null
+  const activeBot =
+    historicalBot && historicalBot.id === selectedBotId ? historicalBot : baseActiveBot
+
+  // Navigation handlers
+  const handleSelectBot = (bot: Bot) => {
+    setHistoricalBot(null)
+    navigate({ search: { bot: bot.id } })
+  }
+
+  const handleBackToHome = () => {
+    setHistoricalBot(null)
+    navigate({ search: { bot: undefined } })
+    refreshBots()
+  }
+
   // Fetch / refresh bots
   const refreshBots = async () => {
     try {
       const updated = await getBotsFn()
       setBots(updated)
-      if (activeBot) {
-        const found = updated.find((b) => b.id === activeBot.id)
-        if (found) setActiveBot(found)
-      }
     } catch (err) {
       console.error("Failed to refresh bots:", err)
     }
@@ -57,8 +83,8 @@ function IndexPage() {
 
   const handleBotUpdated = (updatedBot: Bot) => {
     setBots((prev) => prev.map((b) => (b.id === updatedBot.id ? updatedBot : b)))
-    if (activeBot?.id === updatedBot.id) {
-      setActiveBot(updatedBot)
+    if (historicalBot?.id === updatedBot.id) {
+      setHistoricalBot(updatedBot)
     }
   }
 
@@ -74,7 +100,7 @@ function IndexPage() {
 
   const handleSelectHistoricalVersion = (version: BotVersion) => {
     if (botForTimeline) {
-      setActiveBot({
+      const customVersionBot: Bot = {
         ...botForTimeline,
         currentVersion: version.version,
         name: version.name,
@@ -90,8 +116,10 @@ function IndexPage() {
         initialMessage: version.initialMessage,
         initialChips: version.initialChips,
         n8nWorkflow: version.n8nWorkflow,
-      })
+      }
+      setHistoricalBot(customVersionBot)
       setIsTimelineOpen(false)
+      navigate({ search: { bot: botForTimeline.id } })
     }
   }
 
@@ -99,8 +127,8 @@ function IndexPage() {
     try {
       await deleteBotFn({ data: { id: botId } })
       setBots((prev) => prev.filter((b) => b.id !== botId))
-      if (activeBot?.id === botId) {
-        setActiveBot(null)
+      if (selectedBotId === botId) {
+        handleBackToHome()
       }
     } catch (err) {
       console.error("Failed to delete bot:", err)
@@ -114,16 +142,14 @@ function IndexPage() {
         onSearchChange={setSearchQuery}
         onOpenCreateModal={() => setIsCreateOpen(true)}
         totalBots={bots.length}
+        onGoHome={handleBackToHome}
       />
 
       <main className="flex-1">
         {activeBot ? (
           <ChatView
             bot={activeBot}
-            onBack={() => {
-              setActiveBot(null)
-              refreshBots()
-            }}
+            onBack={handleBackToHome}
             onBotUpdated={handleBotUpdated}
           />
         ) : (
@@ -154,7 +180,7 @@ function IndexPage() {
             <BotGallery
               bots={bots}
               searchQuery={searchQuery}
-              onSelectBot={(bot) => setActiveBot(bot)}
+              onSelectBot={handleSelectBot}
               onEditBot={handleEditClick}
               onViewTimeline={handleTimelineClick}
               onDeleteBot={handleDeleteBot}
