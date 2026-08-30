@@ -207,6 +207,42 @@ const BOT_HANDLERS = {
       chips: ["A. Venus", "B. Mars", "C. Jupiter", "D. Merkurius"],
     }
   },
+
+  "security-sentinel": (message) => {
+    const lower = (message || "").toLowerCase()
+    // Simulated n8n IF condition
+    const isCritical =
+      lower.includes("ransomware") ||
+      lower.includes("malware") ||
+      lower.includes("kebocoran") ||
+      lower.includes("api key") ||
+      lower.includes("breach") ||
+      lower.includes("darurat") ||
+      lower.includes("serangan") ||
+      lower.includes("critical")
+
+    if (isCritical) {
+      return {
+        content: `🚨 **[PROTOKOL TANGGAP DARURAT SIBER TINGKAT 1 (CRITICAL)]**\n\nTerdeteksi indikasi insiden berisiko tinggi: *"${message}"*\n\n### ⚡ Langkah Mitigasi Segera (Containment):\n1. **Isolasi Host/Subnet**: Putuskan koneksi jaringan Ethernet/Wi-Fi mesin terdampak untuk mencegah penyebaran lateral.\n2. **Revoke & Rotate Kredensial**: Cabut seluruh JWT, OAuth tokens, dan API key aktif dari dashboard cloud.\n3. **Amankan Snapshot Memori & Log**: Lakukan dump log firewall dan memory snapshot sebelum mematikan mesin.\n4. **Laporkan ke Tim CSIRT**: Koordinasikan insiden dengan tim tanggap darurat internal.`,
+        chips: [
+          "🛡️ Langkah Isolasi Server VM",
+          "🔑 Cara Rotasi Emergency API Key",
+          "📊 Template Laporan Insiden CSIRT",
+          "🔄 Verifikasi Ulang Host Terinfeksi",
+        ],
+      }
+    } else {
+      return {
+        content: `🛡️ **[REKOMENDASI AUDIT & HARDENING SISTEM]**\n\nTopik audit: *"${message}"*\n\n### 📋 Best Practice Pencegahan (Prevention Baseline):\n1. **Prinsip Least Privilege**: Batasi hak akses IAM ke izin minimal yang dibutuhkan untuk operasional.\n2. **Enforce Multi-Factor Authentication (MFA)**: Wajibkan FIDO2/WebAuthn atau Authenticator app untuk semua akses SSH/Cloud.\n3. **Automated Vulnerability Scan**: Jadwalkan scanning berkala terhadap image container dan dependensi npm/pip.\n4. **TLS & Security Headers**: Pastikan sertifikat SSL/TLS valid serta aktifkan header \`HSTS\`, \`CSP\`, dan \`X-Content-Type-Options\`.`,
+        chips: [
+          "🔒 Checklist Audit Keamanan Cloud",
+          "🔑 Rekomendasi Kebijakan Password & 2FA",
+          "🚨 Laporkan Insiden Darurat",
+          "🌐 Rekomendasi Konfigurasi Firewall/WAF",
+        ],
+      }
+    }
+  },
 }
 
 const server = http.createServer(async (req, res) => {

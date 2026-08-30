@@ -55,6 +55,7 @@ We have created 5 sample bots featuring diverse workflow implementation models a
 | **Cyberpunk Noir 2088** | `RPG & Gaming` | **Python Engine** (n8n Python) | Uses n8n Code node in Python runtime for regex clue matching and forensic text analysis. |
 | **Island 404: Survival** | `Productivity / RPG` | **Low-Code JS** (A bit of JS) | Minimalistic 5-line JavaScript filter classifying survival actions, stamina, and weather threats. |
 | **Trivia Duel Master** | `Education` | **Simple No-Code Rule Engine** (Zero Code, Zero AI) | Pure n8n `Switch` (conditional branching) and `Set` (Edit Fields) nodes with zero scripts and no AI model. |
+| **Aegis Security Sentinel** | `Utility & Security` | **n8n If Node Engine** (Boolean Logic) | Uses n8n `If` node (True/False conditional branching) to triage critical cyber threats vs routine cloud hardening. |
 | **CodeCraft Senior Mentor** | `Coding & Dev` | **JavaScript Engine** (Standard JS) | Full JavaScript logic providing TypeScript/React code reviews, refactoring, and SOLID design advice. |
 
 ---

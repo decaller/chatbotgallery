@@ -1,0 +1,197 @@
+{
+  "name": "Aegis Security Sentinel (n8n If Node Engine)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "security-sentinel",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "ransomware",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "malware",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "kebocoran",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "api key",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "breach",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "darurat",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        }
+      },
+      "name": "Is Critical Threat? (If Node)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "critical_content",
+              "name": "content",
+              "value": "🚨 **[PROTOKOL TANGGAP DARURAT SIBER TINGKAT 1 (CRITICAL)]**\n\nTerdeteksi indikasi insiden berisiko tinggi: *\"{{ $json.body.message }}\"*\n\n### ⚡ Langkah Mitigasi Segera (Containment):\n1. **Isolasi Host/Subnet**: Putuskan koneksi jaringan Ethernet/Wi-Fi mesin terdampak untuk mencegah penyebaran lateral.\n2. **Revoke & Rotate Kredensial**: Cabut seluruh JWT, OAuth tokens, dan API key aktif dari dashboard cloud.\n3. **Amankan Snapshot Memori & Log**: Lakukan dump log firewall dan memory snapshot sebelum mematikan mesin.\n4. **Laporkan ke Tim CSIRT**: Koordinasikan insiden dengan tim tanggap darurat internal.",
+              "type": "string"
+            },
+            {
+              "id": "critical_chips",
+              "name": "chips",
+              "value": "={{ ['🛡️ Langkah Isolasi Server VM', '🔑 Cara Rotasi Emergency API Key', '📊 Template Laporan Insiden CSIRT', '🔄 Verifikasi Ulang Host Terinfeksi'] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Critical Response (True Branch)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 180]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "routine_content",
+              "name": "content",
+              "value": "=🛡️ **[REKOMENDASI AUDIT & HARDENING SISTEM]**\n\nTopik audit: *\"{{ $json.body.message }}\"*\n\n### 📋 Best Practice Pencegahan (Prevention Baseline):\n1. **Prinsip Least Privilege**: Batasi hak akses IAM ke izin minimal yang dibutuhkan untuk operasional.\n2. **Enforce Multi-Factor Authentication (MFA)**: Wajibkan FIDO2/WebAuthn atau Authenticator app untuk semua akses SSH/Cloud.\n3. **Automated Vulnerability Scan**: Jadwalkan scanning berkala terhadap image container dan dependensi npm/pip.\n4. **TLS & Security Headers**: Pastikan sertifikat SSL/TLS valid serta aktifkan header `HSTS`, `CSP`, dan `X-Content-Type-Options`.",
+              "type": "string"
+            },
+            {
+              "id": "routine_chips",
+              "name": "chips",
+              "value": "={{ ['🔒 Checklist Audit Keamanan Cloud', '🔑 Rekomendasi Kebijakan Password & 2FA', '🚨 Laporkan Insiden Darurat', '🌐 Rekomendasi Konfigurasi Firewall/WAF'] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Routine Response (False Branch)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 420]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [980, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is Critical Threat? (If Node)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Critical Threat? (If Node)": {
+      "main": [
+        [
+          {
+            "node": "Set Critical Response (True Branch)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Routine Response (False Branch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Critical Response (True Branch)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Routine Response (False Branch)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
