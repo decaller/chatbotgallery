@@ -427,36 +427,79 @@ export const sendChatMessageFn = createServerFn({ method: "POST" })
         let textContent = ""
         let suggestedChips: string[] | undefined
 
-        if (typeof json === "string") {
-          textContent = json
-        } else if (json.response && typeof json.response === "string") {
-          textContent = json.response
-        } else if (json.output && typeof json.output === "string") {
-          textContent = json.output
-        } else if (json.text && typeof json.text === "string") {
-          textContent = json.text
-        } else if (json.message) {
-          if (typeof json.message === "string") {
-            textContent = json.message
-          } else if (typeof json.message.content === "string") {
-            textContent = json.message.content
+        let dataObj = json
+        if (typeof dataObj === "string") {
+          try {
+            const parsed = JSON.parse(dataObj)
+            if (parsed && typeof parsed === "object") {
+              dataObj = parsed
+            } else {
+              textContent = dataObj
+            }
+          } catch {
+            textContent = dataObj
           }
-        } else if (Array.isArray(json) && json[0]) {
-          const first = json[0]
-          textContent =
-            first.output || first.response || first.text || first.message || JSON.stringify(first)
-        } else if (json.data && typeof json.data === "string") {
-          textContent = json.data
-        } else {
-          textContent = JSON.stringify(json, null, 2)
         }
 
-        if (Array.isArray(json.chips)) {
-          suggestedChips = json.chips.map(String)
-        } else if (Array.isArray(json.suggestions)) {
-          suggestedChips = json.suggestions.map(String)
-        } else if (Array.isArray(json.quickReplies)) {
-          suggestedChips = json.quickReplies.map(String)
+        if (typeof dataObj === "object" && dataObj !== null) {
+          if (dataObj.content && typeof dataObj.content === "string") {
+            textContent = dataObj.content
+          } else if (dataObj.response && typeof dataObj.response === "string") {
+            textContent = dataObj.response
+          } else if (dataObj.output && typeof dataObj.output === "string") {
+            textContent = dataObj.output
+          } else if (dataObj.text && typeof dataObj.text === "string") {
+            textContent = dataObj.text
+          } else if (dataObj.message) {
+            if (typeof dataObj.message === "string") {
+              textContent = dataObj.message
+            } else if (typeof dataObj.message.content === "string") {
+              textContent = dataObj.message.content
+            }
+          } else if (Array.isArray(dataObj) && dataObj[0]) {
+            const first = dataObj[0]
+            textContent =
+              first.content ||
+              first.output ||
+              first.response ||
+              first.text ||
+              first.message ||
+              JSON.stringify(first)
+            if (Array.isArray(first.chips)) {
+              suggestedChips = first.chips.map(String)
+            }
+          } else if (dataObj.data && typeof dataObj.data === "string") {
+            textContent = dataObj.data
+          } else {
+            textContent = JSON.stringify(dataObj, null, 2)
+          }
+
+          if (Array.isArray(dataObj.chips)) {
+            suggestedChips = dataObj.chips.map(String)
+          } else if (Array.isArray(dataObj.suggestions)) {
+            suggestedChips = dataObj.suggestions.map(String)
+          } else if (Array.isArray(dataObj.quickReplies)) {
+            suggestedChips = dataObj.quickReplies.map(String)
+          }
+        }
+
+        // Safety fallback: If textContent is a JSON-serialized string with { content, chips }
+        if (
+          typeof textContent === "string" &&
+          textContent.trim().startsWith("{") &&
+          textContent.trim().endsWith("}")
+        ) {
+          try {
+            const parsedInner = JSON.parse(textContent)
+            if (parsedInner && typeof parsedInner === "object" && parsedInner.content) {
+              textContent = parsedInner.content
+              if (Array.isArray(parsedInner.chips) && !suggestedChips) {
+                suggestedChips = parsedInner.chips.map(String)
+              }
+            }
+          } catch {
+            // Keep textContent as raw string
+          }
         }
 
         return {
