@@ -1,5 +1,5 @@
 {
-  "name": "Trivia Duel Master (No-Code Rule-Based Engine)",
+  "name": "Trivia Duel Master (Memory & State Engine)",
   "nodes": [
     {
       "parameters": {
@@ -15,90 +15,12 @@
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "strict"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.message }}",
-                    "rightValue": "mars",
-                    "operator": {
-                      "type": "string",
-                      "operation": "contains"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "CorrectAnswer"
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra"
-        }
+        "jsCode": "// =============================================================================\n// TRIVIA DUEL MASTER: ADVANCED STATE & CONVERSATIONAL MEMORY ENGINE\n// =============================================================================\nconst body = $json.body || {};\nconst currentMsg = (body.message || '').trim();\nconst history = Array.isArray(body.chatHistory) ? body.chatHistory : [];\nconst lowerMsg = currentMsg.toLowerCase();\n\n// 1. RECONSTRUCT MEMORY & STATE FROM CHAT HISTORY\nconst userMessages = history\n  .filter((h) => h.role === 'user')\n  .map((h) => (h.content || '').trim());\n\n// Append current user message if not already present at the end of history\nconst allUserInputs = [...userMessages];\nif (allUserInputs.length === 0 || allUserInputs[allUserInputs.length - 1] !== currentMsg) {\n  allUserInputs.push(currentMsg);\n}\n\nconst roundIndex = allUserInputs.length; // 1-based current turn/round\n\n// 2. QUESTION BANK DEFINITION\nconst QUESTIONS = [\n  {\n    round: 1,\n    topic: 'Sains & Astronomi',\n    question: 'Planet manakah di tata surya kita yang berjuluk \\\"Planet Merah\\\"?',\n    correctKeywords: ['mars', 'b.', 'b'],\n    correctDisplay: 'B. Mars',\n    explanation: 'Warna merah Mars disebabkan oleh tingginya konsentrasi besi oksida (karat) di permukaannya.',\n    chips: ['A. Venus', 'B. Mars', 'C. Jupiter', 'D. Merkurius']\n  },\n  {\n    round: 2,\n    topic: 'Sejarah & Komputer',\n    question: 'Siapakah matematikawan yang memecahkan kode mesin enkripsi Enigma pada Perang Dunia II?',\n    correctKeywords: ['alan turing', 'turing'],\n    correctDisplay: 'Alan Turing',\n    explanation: 'Alan Turing memimpin tim di Bletchley Park menggunakan mesin elektromekanis Bombe.',\n    chips: ['Alan Turing', 'Charles Babbage', 'Ada Lovelace', 'John von Neumann']\n  },\n  {\n    round: 3,\n    topic: 'Geografi Dunia',\n    question: 'Danau terdalam di dunia yang menampung sekitar 20% air tawar permukaan bumi yang tak beku adalah?',\n    correctKeywords: ['baikal', 'danau baikal'],\n    correctDisplay: 'Danau Baikal (Rusia)',\n    explanation: 'Danau Baikal memiliki kedalaman maksimum mencapai 1.642 meter.',\n    chips: ['Danau Baikal', 'Danau Toba', 'Danau Victoria', 'Danau Superior']\n  },\n  {\n    round: 4,\n    topic: 'Logika & Sains Modern',\n    question: 'Berapakah kecepatan cahaya dalam ruang hampa udara (dalam aproksimasi km/detik)?',\n    correctKeywords: ['300.000', '300000', '300.000 km/s', '300000 km/s', '299.792'],\n    correctDisplay: '300.000 km/detik (299.792.458 m/s)',\n    explanation: 'Cahaya merambat pada konstanta universal c ≈ 300.000 km/s.',\n    chips: ['300.000 km/detik', '150.000 km/detik', '1.000.000 km/detik', '30.000 km/detik']\n  }\n];\n\n// 3. EVALUATE HISTORICAL ANSWERS & COMPUTE SCORE\nlet score = 0;\nlet streak = 0;\nconst roundHistory = [];\n\nfor (let i = 0; i < allUserInputs.length; i++) {\n  const qIndex = i;\n  if (qIndex >= QUESTIONS.length) break;\n  const q = QUESTIONS[qIndex];\n  const ans = allUserInputs[i].toLowerCase();\n  const isCorrect = q.correctKeywords.some((kw) => ans.includes(kw));\n\n  if (isCorrect) {\n    score += 100 + (streak * 25); // Score + streak bonus\n    streak += 1;\n    roundHistory.push({ round: q.round, correct: true, answerGiven: allUserInputs[i] });\n  } else {\n    streak = 0;\n    roundHistory.push({ round: q.round, correct: false, answerGiven: allUserInputs[i] });\n  }\n}\n\n// 4. GENERATE CONTEXTUAL RESPONSE WITH MEMORY RECALL\nlet replyContent = '';\nlet nextChips = [];\n\nconst currentRoundEvaluated = roundHistory[roundHistory.length - 1];\nconst prevQ = QUESTIONS[Math.min(roundIndex - 1, QUESTIONS.length - 1)];\n\n// Memory recap string\nconst memorySnippet = roundHistory.length > 1\n  ? `\\n\\n🧠 *Memori Riwayat:* Dari ${roundHistory.length} babak yang telah kamu lewati, kamu menjawab benar **${roundHistory.filter(r => r.correct).length} dari ${roundHistory.length} pertanyaan**.`\n  : '';\n\nif (roundIndex <= QUESTIONS.length) {\n  const evalText = currentRoundEvaluated.correct\n    ? `🎉 **TEPAT SEKALI! (+100 Poin + Streak Bonus)**\\nKamu memilih: *\\\"${currentRoundEvaluated.answerGiven}\\\"*.\\nℹ️ *Fakta:* ${prevQ.explanation}`\n    : `❌ **KURANG TEPAT!**\\nKamu memilih: *\\\"${currentRoundEvaluated.answerGiven}\\\"*. Jawaban yang benar adalah **${prevQ.correctDisplay}**.\\nℹ️ *Fakta:* ${prevQ.explanation}`;\n\n  if (roundIndex < QUESTIONS.length) {\n    const nextQ = QUESTIONS[roundIndex];\n    replyContent = `📊 **[Papan Skor: ${score} Poin | Streak: ${streak} | Babak ${roundIndex + 1}/${QUESTIONS.length}]**\\n\\n${evalText}${memorySnippet}\\n\\n---\\n\\n🔥 **Babak ${nextQ.round} (${nextQ.topic}):**\\n*\\\"${nextQ.question}\\\"*\`;\n    nextChips = nextQ.chips;\n  } else {\n    // FINAL ROUND SUMMARY\n    let rankTitle = 'Perunggu (Quiz Novice)';\n    if (score >= 450) rankTitle = '🏆 Grand Quiz Master (Legenda Trivia)';\n    else if (score >= 300) rankTitle = '🥈 Perak (Trivia Sage)';\n    else if (score >= 150) rankTitle = '🥉 Perunggu Lanjutan (Smart Challenger)';\n\n    replyContent = `📊 **[Papan Skor Akhir: ${score} Poin | Rank: ${rankTitle}]**\\n\\n${evalText}${memorySnippet}\\n\\n---\\n\\n🏁 **DUEL SELESAI!**\\nKamu telah menyelesaikan seluruh 4 babak tantangan Trivia Duel Master.\\n- **Total Skor Akhir:** ${score} Poin\\n- **Akurasi Jawaban:** ${Math.round((roundHistory.filter(r => r.correct).length / QUESTIONS.length) * 100)}%\\n- **Gelar Pencapaian:** **${rankTitle}**\\n\\nIngin mencoba rematch dengan topik berbeda atau mulai dari awal?`;\n    nextChips = ['🔄 Mainkan Ulang (Rematch)', '🧠 Kuis Sains Lanjutan', '📜 Lihat Papan Peringkat'];\n  }\n} else {\n  // Post-game or reset\n  replyContent = `🧠 **Trivia Duel Master siap untuk sesi kuis baru!**\\n\\nPilih mode permainan yang ingin kamu mainkan:`;\n  nextChips = ['Mulai Kuis Babak 1', 'Mode Sulit (Hardcore)', 'Mode Campuran Acak'];\n}\n\nreturn { json: { content: replyContent, chips: nextChips } };"
       },
-      "name": "Check Answer (Switch - No Code)",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
-      "position": [440, 300]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "content_correct",
-              "name": "content",
-              "value": "🎉 **TEPAT SEKALI! (+100 Poin)**\nJawabannya adalah **B. Mars** (warna merah berasal dari besi oksida).\n\n---\n**Babak 2:** Siapakah pemecah sandi Enigma pada PD II?",
-              "type": "string"
-            },
-            {
-              "id": "chips_correct",
-              "name": "chips",
-              "value": "={{ ['Alan Turing', 'Charles Babbage', 'Ada Lovelace', 'John von Neumann'] }}",
-              "type": "array"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "name": "Set Correct Reply",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [680, 200]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "content_fallback",
-              "name": "content",
-              "value": "=Jawaban/respons tercatat: \"{{ $json.body.message }}\".\n\nPilih kategori tantangan kuis berikutnya:",
-              "type": "string"
-            },
-            {
-              "id": "chips_fallback",
-              "name": "chips",
-              "value": "={{ ['Sains & Antariksa', 'Sejarah Dunia', 'Teknologi & AI', 'Pop Culture'] }}",
-              "type": "array"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "name": "Set Default Reply",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [680, 400]
+      "name": "State & Memory Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
     },
     {
       "parameters": {
@@ -109,60 +31,15 @@
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [920, 300]
+      "position": [720, 300]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [
-        [
-          {
-            "node": "Check Answer (Switch - No Code)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "State & Memory Engine", "type": "main", "index": 0 }]]
     },
-    "Check Answer (Switch - No Code)": {
-      "main": [
-        [
-          {
-            "node": "Set Correct Reply",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Set Default Reply",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set Correct Reply": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set Default Reply": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "State & Memory Engine": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
     }
   }
 }
