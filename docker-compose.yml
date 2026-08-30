@@ -13,6 +13,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      # Domain & Host headers (Supports custom domains or * for reverse proxies)
+      - DOMAIN=${DOMAIN:-}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
       # SQLite database persistence in /app/data volume or Turso Cloud URL
       - DATABASE_URL=${DATABASE_URL:-file:/app/data/local.db}
       - DATABASE_AUTH_TOKEN=${DATABASE_AUTH_TOKEN:-}
