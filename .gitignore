@@ -1,15 +1,27 @@
+# Dependencies
 node_modules
-.DS_Store
+*/node_modules
+
+# Build artifacts
 dist
+*/dist
 dist-ssr
-*.local
-.env*
-.tanstack
-.wrangler
 .output
 .vinxi
-__unconfig*
-todos.json
-
-# typescript
+.tanstack
 *.tsbuildinfo
+
+# Environment & local secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Local SQLite databases & logs
+local.db
+*/local.db
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

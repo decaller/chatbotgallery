@@ -1,0 +1,45 @@
+{
+  "name": "Dungeon RPG Chatbot Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dungeon-rpg",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = ($json.body.message || '').toLowerCase();\nlet reply = '';\nlet chips = [];\n\nif (message.includes('ungu') || message.includes('cahaya')) {\n  reply = 'Kamu melangkah mendekati cahaya ungu. Sebuah Rune Kuno di dinding menyala benderang! Sesosok Peri Roh pelindung menampakkan diri: *\\\"Sebutkan tujuanmu, pengembara fana! Apakah kamu mencari ilmu terlarang atau emas?\\\"*';\n  chips = ['Jawab: Mencari ilmu terlarang', 'Jawab: Mencari jalan pulang', 'Siapkan pedang untuk berjaga'];\n} else if (message.includes('lumut') || message.includes('basah')) {\n  reply = 'Lantai lorong berlumut terasa licin dan dingin. Di kejauhan terdengar dengkuran monster Orc yang tertidur di samping peti harta karun besi berkarat.';\n  chips = ['Buka peti secara perlahan', 'Sembunyi di balik pilar', 'Nyalakan obor lebih terang'];\n} else if (message.includes('ransel') || message.includes('inventaris')) {\n  reply = 'Isi ransel petualangmu:\\n- 1x Belati Baja Valdorath\\n- 1x Ramuan Penyembuh (Heal +50 HP)\\n- 1x Tali Tambang 10m\\n- 15 Keping Emas Kuno';\n  chips = ['Masuk ke lorong ungu', 'Masuk ke lorong berlumut', 'Teguk ramuan penyembuh'];\n} else {\n  reply = `Sebagai Dungeon Master, tindakanmu dicatat: \\\"${$json.body.message}\\\". Langkahmu menggetarkan batu labirin kuno dan membuka relung rahasia di dinding!`;\n  chips = ['Periksa relung rahasia', 'Maju dengan waspada', 'Analisis simbol kuno'];\n}\n\nreturn { json: { content: reply, chips: chips } };"
+      },
+      "name": "Game Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Game Logic", "type": "main", "index": 0 }]]
+    },
+    "Game Logic": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

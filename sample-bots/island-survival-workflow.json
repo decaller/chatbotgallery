@@ -1,0 +1,45 @@
+{
+  "name": "Island Survival Simulator Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "island-survival",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = ($json.body.message || '').toLowerCase();\nlet reply = '';\nlet chips = [];\n\nif (message.includes('kayu') || message.includes('shelter') || message.includes('teduh') || message.includes('tenda')) {\n  reply = 'Kamu berhasil mengumpulkan 8 dahan kayu kokoh dan daun palem lebar. Sebuah tenda bivak darurat selesai dibangun di bawah dinding tebing batu! (Stamina -15, Proteksi Badai +80%).';\n  chips = ['Nyalakan api unggun di depan bivak', 'Cari sumber makanan darurat', 'Istirahat sejenak pulihkan stamina'];\n} else if (message.includes('kelapa') || message.includes('air') || message.includes('makan') || message.includes('minum')) {\n  reply = 'Kamu memanjat pohon kelapa landai dan memetik 2 buah kelapa muda segar serta menemukan mata air jernih. Dahaga dan rasa laparmu teratasi! (Stamina +35, Rasa Lapar 0%).';\n  chips = ['Bangun tempat berteduh darurat', 'Buat sinyal SOS di pasir pantai', 'Eksplorasi ke dalam hutan'];\n} else if (message.includes('api') || message.includes('unggun')) {\n  reply = 'Menggunakan batu rijang dan serat sabut kelapa kering, percikan api menyala! Api unggun hangat berkobar mengusir serangga dan binatang malam.';\n  chips = ['Panggang makanan di atas api', 'Jaga api tetap menyala', 'Buat obor penjelajah'];\n} else {\n  reply = `Aksi survival: \\\"${$json.body.message}\\\". Angin laut berhembus makin kencang membawa aroma hujan badai. Keputusanmu menentukan kelangsungan hidupmu malam ini.`;\n  chips = ['Cari perlindungan di gua karang', 'Kumpulkan kayu bakar tambahan', 'Periksa barang bawaan kapal karam'];\n}\n\nreturn { json: { content: reply, chips: chips } };"
+      },
+      "name": "Survival Simulation Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Survival Simulation Logic", "type": "main", "index": 0 }]]
+    },
+    "Survival Simulation Logic": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

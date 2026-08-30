@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArcadeBot - Galeri Game Percakapan AI</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              900: '#4c1d95',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Kustom scrollbar untuk UI chat dan card list */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans h-full flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- ================= HEADER / NAVBAR ================= -->
+  <header class="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+        <i data-lucide="gamepad-2" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-brand-100 bg-clip-text text-transparent">ArcadeBot AI</h1>
+        <p class="text-xs text-slate-400 hidden sm:block">Petualangan Berbasis Cerita & Percakapan</p>
+      </div>
+    </div>
+
+    <!-- Pencarian & Filter Cepat -->
+    <div class="flex items-center space-x-3">
+      <div class="relative hidden md:block w-64">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input 
+          id="searchInput"
+          type="text" 
+          placeholder="Cari bot game..." 
+          oninput="handleSearch(this.value)"
+          class="w-full bg-slate-800/80 border border-slate-700 rounded-full pl-9 pr-4 py-1.5 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
+        >
+      </div>
+      <div class="flex items-center space-x-2 bg-slate-800/60 border border-slate-700/80 px-3 py-1.5 rounded-full text-xs font-medium text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="hidden sm:inline">Server AI Aktif</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= TAMPILAN 1: HALAMAN GALERI ================= -->
+  <main id="galleryView" class="flex-1 overflow-y-auto pb-16">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8">
+      
+      <!-- Banner Pengantar Singkat -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-brand-950 border border-indigo-900/40 p-6 md:p-8">
+        <div class="relative z-10 max-w-2xl space-y-2">
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-300 border border-brand-500/30">
+            Generasi Baru Text RPG
+          </span>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Mainkan Cerita Interaktif Melalui Chat</h2>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Pilih karakter atau game master AI di bawah ini. Tentukan jalan ceritamu sendiri secara bebas dengan mengetik instruksi atau memilih opsi aksi.
+          </p>
+        </div>
+        <!-- Efek Glow Dekoratif -->
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-brand-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      </div>
+
+      <!-- SEKSI 1: HIGHLIGHT / FEATURED BOTS (PALING ATAS) -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+            <h3 class="text-lg font-bold text-white tracking-wide">Pilihan Unggulan (Highlight)</h3>
+          </div>
+          <span class="text-xs text-slate-400 font-medium">Direkomendasikan Komunitas</span>
+        </div>
+
+        <!-- Grid Galeri Highlight -->
+        <div id="highlightGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Item Highlight Diisi Oleh Javascript -->
+        </div>
+      </section>
+
+      <!-- SEKSI 2: KATEGORI & SEMUA GAME BOT -->
+      <section class="space-y-4 pt-2">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="layout-grid" class="w-5 h-5 text-brand-400"></i>
+            <h3 class="text-lg font-bold text-white tracking-wide">Eksplorasi Semua Game</h3>
+          </div>
+
+          <!-- Kategori Tabs -->
+          <div id="categoryTabs" class="flex items-center space-x-2 overflow-x-auto hide-scrollbar pb-1">
+            <!-- Tabs diisi JavaScript -->
+          </div>
+        </div>
+
+        <!-- Grid Galeri Standar -->
+        <div id="botsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Item Grid Diisi Oleh Javascript -->
+        </div>
+
+        <!-- State Kosong jika Pencarian Nihil -->
+        <div id="emptyState" class="hidden text-center py-16 space-y-3">
+          <div class="w-12 h-12 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+            <i data-lucide="search-x" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-base font-semibold text-slate-300">Game bot tidak ditemukan</h4>
+          <p class="text-xs text-slate-500">Coba kata kunci pencarian atau kategori yang berbeda.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ================= TAMPILAN 2: HALAMAN CHAT BOT (AWALNYA TERSEMBUNYI) ================= -->
+  <div id="chatView" class="hidden flex-1 h-[calc(100vh-61px)] flex-col bg-slate-950 relative">
+    
+    <!-- Top Bar Chat: Info Bot yang Sedang Aktif -->
+    <div class="bg-slate-900/90 border-b border-slate-800 px-4 py-3 flex items-center justify-between shrink-0">
+      <div class="flex items-center space-x-3 min-w-0">
+        <button 
+          onclick="closeChat()" 
+          class="p-2 -ml-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center justify-center group"
+          title="Kembali ke Galeri"
+        >
+          <i data-lucide="arrow-left" class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform"></i>
+        </button>
+
+        <div id="chatAvatarBadge" class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-xl shrink-0 shadow-md">
+          🧙‍♂️
+        </div>
+
+        <div class="min-w-0">
+          <div class="flex items-center space-x-2">
+            <h2 id="chatBotTitle" class="text-sm sm:text-base font-bold text-white truncate">Dungeon Master</h2>
+            <span id="chatBotGenre" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-500/20 text-brand-300 border border-brand-500/30">RPG</span>
+          </div>
+          <p id="chatBotTagline" class="text-xs text-slate-400 truncate">Pemandu petualangan dunia fantasi interaktif</p>
+        </div>
+      </div>
+
+      <!-- Kontrol Obrolan -->
+      <div class="flex items-center space-x-2">
+        <button 
+          onclick="resetConversation()" 
+          class="px-2.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-rose-300 rounded-lg transition flex items-center space-x-1.5 border border-slate-700"
+          title="Mulai Ulang Cerita"
+        >
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Ulang Cerita</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Area Pesan (Percakapan) -->
+    <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 max-w-4xl w-full mx-auto">
+      <!-- Percakapan akan dirender dinamis via JS -->
+    </div>
+
+    <!-- Footer Input Bar & Action Chips -->
+    <div class="border-t border-slate-800 bg-slate-900/95 p-3 md:p-4 shrink-0">
+      <div class="max-w-4xl mx-auto space-y-3">
+        
+        <!-- Pilihan Aksi Cepat (Quick Suggestions) -->
+        <div id="quickChipsContainer" class="flex items-center space-x-2 overflow-x-auto hide-scrollbar pb-1 text-xs">
+          <!-- Chip tombol aksi diisi JS -->
+        </div>
+
+        <!-- Form Input Chat -->
+        <form id="chatForm" onsubmit="handleUserSubmit(event)" class="flex items-center space-x-2">
+          <div class="relative flex-1">
+            <input 
+              id="userInput" 
+              type="text" 
+              placeholder="Ketik tindakan, dialog, atau keputusanmu di sini..." 
+              autocomplete="off"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all pr-10"
+            >
+          </div>
+          <button 
+            type="submit" 
+            class="h-11 px-5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium text-sm flex items-center justify-center space-x-1.5 shadow-lg shadow-brand-600/30 transition active:scale-95 disabled:opacity-50"
+          >
+            <span class="hidden sm:inline">Kirim</span>
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </form>
+
+        <p class="text-[11px] text-center text-slate-500">
+          Tip: Kamu bisa mengetik aksi kreatif bebas atau menekan salah satu tombol saran di atas.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // --- DATABASE GAME BOTS ---
+    const GAME_BOTS = [
+      // Kategori Highlight (Tampil di bagian paling atas)
+      {
+        id: 'bot-dungeon-rpg',
+        name: 'Dungeon & Shadow Quest',
+        genre: 'RPG Fantasi',
+        category: 'rpg',
+        isHighlight: true,
+        emoji: '🧙‍♂️',
+        themeColor: 'from-amber-600 to-purple-800',
+        borderColor: 'border-amber-500/40',
+        tagline: 'Eksplorasi labirin kuno penuh teka-teki magis dan naga.',
+        description: 'AI Game Master yang memandu takdir karaktermu dengan sistem inventaris dan konsekuensi naratif.',
+        playersCount: '24.8k Pemain',
+        initialMessage: 'Salam petualang! Kamu terbangun di depan gerbang batu labirin Valdorath. Obor di tanganmu mulai redup. Di depanmu ada dua lorong: satu berbau lumut basah, dan satu lagi memancarkan cahaya ungu misterius. Apa tindakan pertamamu?',
+        quickPrompts: [
+          '🔥 Masuk ke lorong bercahaya ungu',
+          '🛡️ Masuk ke lorong berlumut dengan hati-hati',
+          '🎒 Periksa isi ransel petualang'
+        ],
+        responseEngine: (prompt) => {
+          const lower = prompt.toLowerCase();
+          if (lower.includes('ungu') || lower.includes('cahaya')) {
+            return {
+              text: 'Kamu melangkah mendekati cahaya ungu. Tiba-tiba sebuah Rune Kuno di dinding menyala terang! Sesosok Peri Roh muncul dan bertanya: *"Sebutkan tujuanmu, pengembara fana! Apakah kamu mencari ilmu terlarang atau emas?"*',
+              chips: ['Jawab: Mencari ilmu terlarang', 'Jawab: Mencari jalan pulang', 'Siapkan pedang untuk berjaga']
+            };
+          } else if (lower.includes('lumut') || lower.includes('basah')) {
+            return {
+              text: 'Lantai lorong berlumut terasa licin. Di kejauhan terdengar suara langkah berat dari monster penjaga Orc. Kamu menemukan sebuah peti kayu lapuk tergeletak di sudut.',
+              chips: ['Buka peti secara perlahan', 'Sembunyi di balik pilar', 'Nyalakan obor lebih terang']
+            };
+          } else if (lower.includes('ransel') || lower.includes('tas') || lower.includes('inventaris')) {
+            return {
+              text: 'Isi ranselmu saat ini:\n- 1x Belati Baja\n- 1x Ramuan Penyembuh Kecil\n- 1x Tali Tambang 10m\n- 5 Keping Emas.\n\nLorong di depanmu masih menunggu keputusanmu!',
+              chips: ['Masuk ke lorong ungu', 'Masuk ke lorong berlumut', 'Teguk ramuan penyembuh']
+            };
+          } else {
+            return {
+              text: `Menarik! Sebagai Dungeon Master, saya mencatat tindakanmu: "${prompt}". Langkahmu memicu mekanisme tersembunyi, lantai bergetar dan pintu keluar tertutup perlahan. Apa langkah selanjutnya?`,
+              chips: ['Cari tombol pembatal jebakan', 'Maju dengan waspada', 'Analisis simbol di dinding']
+            };
+          }
+        }
+      },
+      {
+        id: 'bot-cyber-detective',
+        name: 'Cyberpunk Noir 2088',
+        genre: 'Misteri & Sci-Fi',
+        category: 'misteri',
+        isHighlight: true,
+        emoji: '🕵️‍♂️',
+        themeColor: 'from-cyan-600 to-blue-900',
+        borderColor: 'border-cyan-500/40',
+        tagline: 'Pecahkan pembunuhan CEO Android di kota metropolitan Neo-Jakarta.',
+        description: 'Interogasi saksi robot, analisis bukti cybernetic, dan ungkap konspirasi megakorporasi.',
+        playersCount: '19.2k Pemain',
+        initialMessage: 'Hujan asam mengguyur distrik Glodok 2088. Tubuh CEO Synthetica Corp ditemukan kaku di penthouse lantai 80 dengan chip memori yang rusak. Kamu adalah Detektif Bayaran Vane. Saksi mata di ruangan ini adalah android pelayan model K-9. Apa yang ingin kamu periksa dulu?',
+        quickPrompts: [
+          '🔍 Pindai chip memori korban dengan scanner',
+          '🤖 Interogasi android pelayan K-9',
+          '🚪 Periksa rekaman kamera pintu masuk'
+        ],
+        responseEngine: (prompt) => {
+          const lower = prompt.toLowerCase();
+          if (lower.includes('pindai') || lower.includes('chip') || lower.includes('korban')) {
+            return {
+              text: 'Scanner-mu berbunyi nyaring. Chip memori korban sengaja dibakar dengan EMP berdaya rendah sesaat sebelum tewas. Namun ada data terenkripsi bertuliskan kode "PROJECT_EVE".',
+              chips: ['Dekripsi data PROJECT_EVE', 'Tanyakan PROJECT_EVE ke Android K-9', 'Cari sumber EMP di ruangan']
+            };
+          } else if (lower.includes('interogasi') || lower.includes('android') || lower.includes('k-9')) {
+            return {
+              text: 'Android K-9 menatapmu dengan mata sintetis berkedip kuning: *"Saya tidak melihat penyerang, Tuan Detektif. Protokol keamanan saya dinonaktifkan dari jarak jauh pada pukul 23:14."*',
+              chips: ['Tanyakan siapa yang punya akses jarak jauh', 'Uji apakah AI ini berbohong', 'Periksa log aktivitasnya']
+            };
+          } else {
+            return {
+              text: `Kamu melakukan investigasi: "${prompt}". Bukti baru berhasil didapatkan! Kamu menemukan puntung rokok ilegal beraroma vanila neon di ventilasi balkon.`,
+              chips: ['Kejar jejak ke arah balkon', 'Kirim sampel rokok ke lab forensik', 'Lanjutkan interogasi K-9']
+            };
+          }
+        }
+      },
+      {
+        id: 'bot-escape-island',
+        name: 'Island 404: Survival',
+        genre: 'Survival Simulasi',
+        category: 'survival',
+        isHighlight: true,
+        emoji: '🏝️',
+        themeColor: 'from-emerald-600 to-teal-900',
+        borderColor: 'border-emerald-500/40',
+        tagline: 'Terjebak di pulau tak berpenghuni. Kelola rasa lapar, stamina, dan shelter.',
+        description: 'Simulasi bertahan hidup berbasis teks dengan mekanik crafting dinamis dan cuaca ekstrem.',
+        playersCount: '31.5k Pemain',
+        initialMessage: 'Kapalmu karam. Kamu terdampar di pantai berpasir hitam. Hari sudah sore (Pukul 16:30), perutmu lapar, dan awan mendung menandakan badai tropis akan datang dalam 2 jam. Apa tindakan utamamu sebelum gelap?',
+        quickPrompts: [
+          '🪵 Kumpulkan kayu dan buat tempat berlindung',
+          '🥥 Cari kelapa & sumber air tawar',
+          '🔥 Coba membuat api unggun di pantai'
+        ],
+        responseEngine: (prompt) => {
+          const lower = prompt.toLowerCase();
+          if (lower.includes('kayu') || lower.includes('shelter') || lower.includes('tempat berlindung')) {
+            return {
+              text: 'Kamu berhasil mengumpulkan 8 batang kayu dan daun palem besar. Sebuah tenda darurat berhasil didirikan di bawah tebing karang! Stamina berkurang (-20), tapi kamu aman dari terpaan angin.',
+              chips: ['Nyalakan api di depan tenda', 'Pergi cari makanan ringan', 'Istirahat untuk memulihkan tenaga']
+            };
+          } else if (lower.includes('kelapa') || lower.includes('air') || lower.includes('makan')) {
+            return {
+              text: 'Kamu menemukan 2 buah kelapa jatuh dan aliran mata air kecil di dekat hutan bakau. Dahaga dan rasa laparmu teratasi (+30 Stamina). Tapi langit semakin gelap pekat!',
+              chips: ['Segera bangun tempat berlindung darurat', 'Bawa air ke pantai terbuka', 'Cari tempat berteduh alami di gua']
+            };
+          } else {
+            return {
+              text: `Aksi dijalankan: "${prompt}". Keputusanmu mengubah dinamika pulau. Angin badai mulai bertiup kencang, deburan ombak semakin mendekat.`,
+              chips: ['Masuk ke dalam hutan untuk berlindung', 'Buat sinyal darurat ASAP', 'Periksa barang bawaan karam']
+            };
+          }
+        }
+      },
+
+      // Kategori Game Reguler Lainnya
+      {
+        id: 'bot-trivia-clash',
+        name: 'Trivia Duel Master',
+        genre: 'Kuis & Asah Otak',
+        category: 'trivia',
+        isHighlight: false,
+        emoji: '🧠',
+        themeColor: 'from-blue-600 to-indigo-900',
+        tagline: 'Uji wawasanmu melawan AI pembawa acara kuis terlucu.',
+        description: 'Ribuan topik mulai dari sejarah, pop culture, sains hingga teka-teki logika tingkat tinggi.',
+        playersCount: '15.4k Pemain',
+        initialMessage: 'Selamat datang di panggung Trivia Duel! Saya QuizBot3000. Skor awalmu: 0 Poin.\n\nPertanyaan Babak 1 (Sains):\n"Planet manakah di tata surya kita yang memiliki julukan Planet Merah?"',
+        quickPrompts: ['A. Venus', 'B. Mars', 'C. Jupiter', 'D. Merkurius'],
+        responseEngine: (prompt) => {
+          if (prompt.toLowerCase().includes('mars') || prompt.toLowerCase().includes('b')) {
+            return {
+              text: '🎉 **TEPAT SEKALI!** Jawabannya adalah Mars (karena oksida besi di permukaannya).\nSkormu: 100 Poin!\n\nPertanyaan Babak 2 (Sejarah/Teknologi):\n"Siapakah tokoh yang dikenal sebagai bapak komputer modern penemu mesin analitis?"',
+              chips: ['Charles Babbage', 'Alan Turing', 'Nikola Tesla', 'Thomas Edison']
+            };
+          } else {
+            return {
+              text: '❌ Oops, jawaban kurang tepat atau belum spesifik! Planet merah adalah Mars.\nSkormu: 0 Poin.\n\nAyo coba lagi di pertanyaan berikutnya: "Apa ibukota negara Jepang?"',
+              chips: ['Tokyo', 'Kyoto', 'Osaka', 'Sapporo']
+            };
+          }
+        }
+      },
+      {
+        id: 'bot-kingdom-ruler',
+        name: 'Mahkota Nusantara: Sim Taktis',
+        genre: 'Manajemen Kerajaan',
+        category: 'strategi',
+        isHighlight: false,
+        emoji: '👑',
+        themeColor: 'from-amber-600 to-yellow-900',
+        tagline: 'Pimpin sebuah kerajaan maritim abad ke-14 menuju kejayaan.',
+        description: 'Seimbangkan keuangan kerajaan, loyalitas rakyat, kekuatan militer, dan diplomasi asing.',
+        playersCount: '12.1k Pemain',
+        initialMessage: 'Paduka Yang Mulia! Anda baru saja dinobatkan sebagai Raja Samudra Kencana. Kas kasir saat ini: 1.000 Keping Emas, Pasukan: 500 Prajurit, Rakyat: Puas.\n\nPenasihat Istana mengabarkan: Armada pedagang dari negeri seberang ingin meminta hak monopoli rempah dengan imbalan 500 Emas. Apa titah Paduka?',
+        quickPrompts: [
+          '📜 Tolak tawaran demi pedagang lokal',
+          '💰 Terima tawaran untuk menambah kas perang',
+          '🤝 Negosiasikan pajak sebesar 25% tanpa monopoli'
+        ],
+        responseEngine: (prompt) => {
+          return {
+            text: `Titah Baginda: "${prompt}" telah dilaksanakan para menteri!\n\nHasil Keputusan: Hubungan diplomatik berubah dinamis, para saudagar lokal memberi apresiasi. Tiba-tiba laporan intelijen masuk: Bajak laut terlihat mendekati dermaga timur!`,
+            chips: ['Kirim 200 prajurit untuk pertahanan', 'Ajak negosiasi damai', 'Beri hadiah agar mereka pergi']
+          };
+        }
+      },
+      {
+        id: 'bot-horror-mansion',
+        name: 'Misteri Kastil Hantu Asri',
+        genre: 'Horor Interaktif',
+        category: 'misteri',
+        isHighlight: false,
+        emoji: '🕯️',
+        themeColor: 'from-rose-950 to-slate-900',
+        tagline: 'Kastil tua peninggalan era kolonial yang terkutuk.',
+        description: 'Audio imersif teks dan plot jumpscare psikologis yang membuat bulu kuduk berdiri.',
+        playersCount: '18.7k Pemain',
+        initialMessage: 'Pukul 00:00. Pintu gerbang besi kastil tertutup rapat dan terkunci otomatis di belakangmu. Di lantai atas terdengar alunan tuts piano memainkan lagu pengantar tidur yang sumbang. Kamu memegang satu buah lilin yang hampir padam.',
+        quickPrompts: [
+          '🎹 Naik ke lantai atas menuju suara piano',
+          '🚪 Cari kunci gerbang di ruang resepsionis',
+          '🪞 Periksa cermin antik di lorong utama'
+        ],
+        responseEngine: (prompt) => {
+          return {
+            text: `Kamu memutuskan: "${prompt}". Suhu ruangan seketika anjlok drastis sampai nafasmu berembun. Saat kamu melangkah, suara piano tiba-tiba BERHENTI seketika. Terdengar bisikan dingin tepat di samping telingamu: *"Mengapa kamu terlambat pulang...?"*`,
+            chips: ['Tengok ke belakang perlahan', 'Lari secepatnya ke ruang bawah tanah', 'Bacakan doa pelindung']
+          };
+        }
+      },
+      {
+        id: 'bot-space-fleet',
+        name: 'Galactic Fleet Odyssey',
+        genre: 'Sci-Fi Strategi',
+        category: 'strategi',
+        isHighlight: false,
+        emoji: '🚀',
+        themeColor: 'from-blue-600 to-cyan-950',
+        tagline: 'Jelajahi galaksi tak terpetakan dengan kapal penjelajah USS Aurora.',
+        description: 'Kelola energi warp, hadapi anomali lubang hitam, dan lakukan kontak pertama dengan peradaban alien.',
+        playersCount: '8.9k Pemain',
+        initialMessage: 'Kapten di jembatan! USS Aurora telah keluar dari hyperspace di orbit Planet Kepler-186f. Sensor mendeteksi sinyal transmisi frekuensi tinggi dari bawah permukaan laut planet tersebut. Cadangan energi kapal berada pada 85%.',
+        quickPrompts: [
+          '🛰️ Luncurkan drone pemindai laut',
+          '📻 Terjemahkan transmisi alien dengan AI linguistik',
+          '🛡️ Naikkan deflector shield dan tetap di orbit aman'
+        ],
+        responseEngine: (prompt) => {
+          return {
+            text: `Perintah kapten: "${prompt}" dieksekusi oleh kru!\n\nSensor menangkap reaksi cepat dari kedalaman laut. Sebuah struktur megastruktur kuno mulai naik ke permukaan air, memancarkan gelombang elektromagnetik damai.`,
+            chips: ['Kirim pesan salam persahabatan', 'Persiapkan tim ekspedisi darat', 'Pindai komposisi mineral struktur']
+          };
+        }
+      },
+      {
+        id: 'bot-chef-tycoon',
+        name: 'Resto Master AI',
+        genre: 'Simulasi Santai',
+        category: 'simulasi',
+        isHighlight: false,
+        emoji: '🍳',
+        themeColor: 'from-orange-600 to-amber-950',
+        tagline: 'Bangun restoran bintang 5 dari warung tenda sederhana.',
+        description: 'Ciptakan resep masakan fusi rahasia, hadapi juri kritikus makanan galak, dan kelola karyawan.',
+        playersCount: '14.3k Pemain',
+        initialMessage: 'Selamat pagi Chef! Hari ini adalah pembukaan warung kuliner barumu di pusat kota. Pelanggan pertama adalah seorang food vlogger terkenal yang meminta hidangan spesial yang "pedas, gurih, dan Instagramable". Apa menu yang akan kamu racik?',
+        quickPrompts: [
+          '🍜 Nasi Goreng Keju Lava Super Pedas',
+          '🥩 Steak Wagyu Sambal Matah Kecombrang',
+          '🥗 Salad Buah Tropis Dressing Madu Lemon'
+        ],
+        responseEngine: (prompt) => {
+          return {
+            text: `Chef memasak: "${prompt}" dengan teknik flambe yang memukau!\n\nFood vlogger tersebut mencicipi suapan pertama... Matanya berbinar! Dia langsung merekam story: *"Guys, makanan ini rasanya 10/10! Wajib viral!"* Antrean pembeli langsung mengular di depan restoran!`,
+            chips: ['Tambah 2 asisten koki baru', 'Naikkan harga menu sedikit', 'Ciptakan varian menu penutup']
+          };
+        }
+      }
+    ];
+
+    // --- STATE MANAGEMENT APLIKASI ---
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let currentActiveBot = null;
+    let chatHistories = {}; // Menyimpan riwayat chat per bot ID
+
+    // Kategori Filter
+    const CATEGORIES = [
+      { id: 'all', label: 'Semua Genre' },
+      { id: 'rpg', label: 'RPG & Fantasi' },
+      { id: 'misteri', label: 'Misteri & Horor' },
+      { id: 'strategi', label: 'Taktik & Strategi' },
+      { id: 'survival', label: 'Survival' },
+      { id: 'trivia', label: 'Kuis & Trivia' },
+      { id: 'simulasi', label: 'Simulasi' }
+    ];
+
+    // --- INISIALISASI SAAT HALAMAN DIMUAT ---
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategoryTabs();
+      renderGallery();
+      lucide.createIcons();
+    });
+
+    // --- RENDER TABS KATEGORI ---
+    function renderCategoryTabs() {
+      const container = document.getElementById('categoryTabs');
+      container.innerHTML = CATEGORIES.map(cat => {
+        const isActive = activeCategory === cat.id;
+        return `
+          <button 
+            onclick="setCategory('${cat.id}')"
+            class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+              isActive 
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30' 
+                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60'
+            }"
+          >
+            ${cat.label}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function setCategory(catId) {
+      activeCategory = catId;
+      renderCategoryTabs();
+      renderGallery();
+    }
+
+    function handleSearch(query) {
+      searchQuery = query.toLowerCase().trim();
+      renderGallery();
+    }
+
+    // --- RENDER SEMUA GALERI (HIGHLIGHT & DAFTAR REGULER) ---
+    function renderGallery() {
+      const highlightGrid = document.getElementById('highlightGrid');
+      const botsGrid = document.getElementById('botsGrid');
+      const emptyState = document.getElementById('emptyState');
+
+      // Filter bot berdasarkan pencarian & kategori
+      const filteredBots = GAME_BOTS.filter(bot => {
+        const matchesCategory = activeCategory === 'all' || bot.category === activeCategory;
+        const matchesSearch = bot.name.toLowerCase().includes(searchQuery) ||
+                              bot.description.toLowerCase().includes(searchQuery) ||
+                              bot.genre.toLowerCase().includes(searchQuery);
+        return matchesCategory && matchesSearch;
+      });
+
+      // 1. Render Seksi Highlight (Hanya bot dengan flag isHighlight)
+      const highlightBots = filteredBots.filter(b => b.isHighlight);
+      if (highlightBots.length > 0) {
+        highlightGrid.parentElement.classList.remove('hidden');
+        highlightGrid.innerHTML = highlightBots.map(bot => createHighlightCard(bot)).join('');
+      } else {
+        highlightGrid.parentElement.classList.add('hidden');
+      }
+
+      // 2. Render Seksi Grid Standar (Semua yang match)
+      if (filteredBots.length > 0) {
+        emptyState.classList.add('hidden');
+        botsGrid.classList.remove('hidden');
+        botsGrid.innerHTML = filteredBots.map(bot => createStandardCard(bot)).join('');
+      } else {
+        emptyState.classList.remove('hidden');
+        botsGrid.classList.add('hidden');
+      }
+
+      lucide.createIcons();
+    }
+
+    // --- KOMPONEN KARTU HIGHLIGHT (Tampilan Premium & Menonjol) ---
+    function createHighlightCard(bot) {
+      return `
+        <div 
+          onclick="openChat('${bot.id}')"
+          class="group relative bg-gradient-to-b from-slate-800/90 to-slate-900 border ${bot.borderColor} hover:border-brand-400/80 rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-500/10 flex flex-col justify-between overflow-hidden"
+        >
+          <!-- Badge Highlight Pojok Kanan -->
+          <div class="absolute top-3 right-3 flex items-center space-x-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-bold">
+            <i data-lucide="flame" class="w-3 h-3"></i>
+            <span>HIGHLIGHT</span>
+          </div>
+
+          <div class="space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr ${bot.themeColor} flex items-center justify-center text-3xl shadow-lg group-hover:scale-105 transition-transform">
+              ${bot.emoji}
+            </div>
+
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-semibold text-brand-400 tracking-wide">${bot.genre}</span>
+                <span class="text-slate-600">•</span>
+                <span class="text-[11px] text-slate-400">${bot.playersCount}</span>
+              </div>
+              <h4 class="text-lg font-bold text-white group-hover:text-brand-300 transition-colors mt-0.5">${bot.name}</h4>
+            </div>
+
+            <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed">${bot.tagline}</p>
+          </div>
+
+          <div class="pt-4 mt-2 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="text-xs font-semibold text-brand-400 flex items-center group-hover:underline">
+              Mulai Percakapan Game
+              <i data-lucide="chevron-right" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"></i>
+            </span>
+            <div class="w-8 h-8 rounded-full bg-slate-800 group-hover:bg-brand-600 text-slate-300 group-hover:text-white flex items-center justify-center transition-colors">
+              <i data-lucide="message-square" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- KOMPONEN KARTU STANDAR ---
+    function createStandardCard(bot) {
+      return `
+        <div 
+          onclick="openChat('${bot.id}')"
+          class="group bg-slate-900/70 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:-translate-y-1 flex flex-col justify-between"
+        >
+          <div class="space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-tr ${bot.themeColor} flex items-center justify-center text-2xl shadow-md group-hover:scale-105 transition-transform">
+                ${bot.emoji}
+              </div>
+              <span class="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                ${bot.genre}
+              </span>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-bold text-white group-hover:text-brand-300 transition-colors truncate">${bot.name}</h4>
+              <p class="text-[11px] text-slate-400 line-clamp-2 mt-1 leading-relaxed">${bot.tagline}</p>
+            </div>
+          </div>
+
+          <div class="pt-3 mt-3 border-t border-slate-800/60 flex items-center justify-between text-xs">
+            <span class="text-[11px] text-slate-500">${bot.playersCount}</span>
+            <span class="text-brand-400 font-medium group-hover:translate-x-0.5 transition-transform flex items-center">
+              Main <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+            </span>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- NAVIGASI KE RUANG CHAT ---
+    function openChat(botId) {
+      const bot = GAME_BOTS.find(b => b.id === botId);
+      if (!bot) return;
+
+      currentActiveBot = bot;
+
+      // Inisialisasi riwayat chat jika belum ada
+      if (!chatHistories[bot.id]) {
+        chatHistories[bot.id] = [
+          {
+            sender: 'bot',
+            text: bot.initialMessage,
+            time: formatCurrentTime()
+          }
+        ];
+      }
+
+      // Update Header Info Bot di View Chat
+      document.getElementById('chatAvatarBadge').textContent = bot.emoji;
+      document.getElementById('chatBotTitle').textContent = bot.name;
+      document.getElementById('chatBotGenre').textContent = bot.genre;
+      document.getElementById('chatBotTagline').textContent = bot.tagline;
+
+      // Switch Tampilan
+      document.getElementById('galleryView').classList.add('hidden');
+      document.getElementById('chatView').classList.remove('hidden');
+      document.getElementById('chatView').classList.add('flex');
+
+      // Render Riwayat Pesan & Chips
+      renderMessages();
+      renderQuickChips(bot.quickPrompts);
+
+      lucide.createIcons();
+
+      // Focus input otomatis
+      setTimeout(() => {
+        document.getElementById('userInput').focus();
+      }, 100);
+    }
+
+    // --- KEMBALI KE GALERI ---
+    function closeChat() {
+      document.getElementById('chatView').classList.add('hidden');
+      document.getElementById('chatView').classList.remove('flex');
+      document.getElementById('galleryView').classList.remove('hidden');
+      currentActiveBot = null;
+    }
+
+    // --- RESET PERCAKAPAN ---
+    function resetConversation() {
+      if (!currentActiveBot) return;
+      
+      chatHistories[currentActiveBot.id] = [
+        {
+          sender: 'bot',
+          text: currentActiveBot.initialMessage,
+          time: formatCurrentTime()
+        }
+      ];
+      renderMessages();
+      renderQuickChips(currentActiveBot.quickPrompts);
+    }
+
+    // --- RENDER PESAN CHAT ---
+    function renderMessages() {
+      if (!currentActiveBot) return;
+      const history = chatHistories[currentActiveBot.id] || [];
+      const container = document.getElementById('messagesContainer');
+
+      container.innerHTML = history.map(msg => {
+        const isBot = msg.sender === 'bot';
+        return `
+          <div class="flex items-start space-x-3 ${isBot ? '' : 'flex-row-reverse space-x-reverse'}">
+            <!-- Avatar -->
+            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm ${
+              isBot ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-200'
+            }">
+              ${isBot ? currentActiveBot.emoji : '👤'}
+            </div>
+
+            <!-- Bubble Chat -->
+            <div class="max-w-[85%] sm:max-w-lg space-y-1">
+              <div class="flex items-center space-x-2 ${isBot ? '' : 'justify-end'}">
+                <span class="text-[11px] font-medium text-slate-400">${isBot ? currentActiveBot.name : 'Kamu'}</span>
+                <span class="text-[10px] text-slate-500">${msg.time}</span>
+              </div>
+              <div class="p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-line ${
+                isBot 
+                  ? 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-sm shadow-sm' 
+                  : 'bg-brand-600 text-white rounded-tr-sm shadow-md shadow-brand-600/20'
+              }">
+                ${msg.text}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Auto scroll ke bawah
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // --- RENDER TOMBOL SARAN CEPAT (ACTION CHIPS) ---
+    function renderQuickChips(prompts) {
+      const container = document.getElementById('quickChipsContainer');
+      if (!prompts || prompts.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = prompts.map(p => `
+        <button 
+          type="button"
+          onclick="sendPromptFromChip('${p.replace(/'/g, "\\'")}')"
+          class="px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-brand-600 hover:text-white border border-slate-700 text-slate-300 whitespace-nowrap transition-colors flex items-center space-x-1.5 shadow-sm"
+        >
+          <span>${p}</span>
+        </button>
+      `).join('');
+    }
+
+    function sendPromptFromChip(text) {
+      document.getElementById('userInput').value = text;
+      handleUserSubmit(new Event('submit'));
+    }
+
+    // --- LOGIKA PENGIRIMAN PESAN & RESPON AI ---
+    function handleUserSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text || !currentActiveBot) return;
+
+      const botId = currentActiveBot.id;
+
+      // 1. Simpan dan render pesan user
+      chatHistories[botId].push({
+        sender: 'user',
+        text: text,
+        time: formatCurrentTime()
+      });
+      input.value = '';
+      renderMessages();
+
+      // Nonaktifkan sementara input
+      input.disabled = true;
+
+      // Tampilkan indikator mengetik
+      showTypingIndicator();
+
+      // 2. Simulasi delay berpikir AI (600ms - 1200ms)
+      setTimeout(() => {
+        removeTypingIndicator();
+        input.disabled = false;
+        input.focus();
+
+        // Hitung balasan melalui engine bot
+        const outcome = currentActiveBot.responseEngine(text);
+
+        // Simpan pesan balasan bot
+        chatHistories[botId].push({
+          sender: 'bot',
+          text: outcome.text,
+          time: formatCurrentTime()
+        });
+
+        renderMessages();
+
+        // Update tombol aksi cepat sesuai respons terkini
+        if (outcome.chips) {
+          renderQuickChips(outcome.chips);
+        }
+      }, 900);
+    }
+
+    // --- INDIKATOR MENGETIK ---
+    function showTypingIndicator() {
+      const container = document.getElementById('messagesContainer');
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typingIndicator';
+      typingDiv.className = 'flex items-start space-x-3';
+      typingDiv.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 text-sm">
+          ${currentActiveBot.emoji}
+        </div>
+        <div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm flex items-center space-x-1.5">
+          <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce"></div>
+          <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]"></div>
+          <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce [animation-delay:0.4s]"></div>
+        </div>
+      `;
+      container.appendChild(typingDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const indicator = document.getElementById('typingIndicator');
+      if (indicator) indicator.remove();
+    }
+
+    // Helper format waktu (HH:MM)
+    function formatCurrentTime() {
+      const now = new Date();
+      return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "name": "CodeCraft Senior Mentor Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "code-mentor",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = ($json.body.message || '').toLowerCase();\nlet reply = '';\nlet chips = [];\n\nif (message.includes('react') || message.includes('typescript') || message.includes('review')) {\n  reply = '### 💡 Rekomendasi Code Review & Best Practice\\n\\n1. **Type Safety**: Hindari penggunaan `any`, manfaatkan discriminated unions dan type guards.\\n2. **Component Separation**: Pisahkan stateful container dari presentational UI components.\\n3. **Memoization**: Gunakan `useMemo`/`useCallback` secara selektif pada kalkulasi berat atau dependency referensial.\\n\\nApakah kamu ingin meninjau snippet kode tertentu atau optimasi rendering?';\n  chips = ['Beri contoh snippet refactoring', 'Bagaimana optimasi re-render?', 'Best practice custom hooks'];\n} else if (message.includes('arsitektur') || message.includes('rest') || message.includes('system')) {\n  reply = '### 🏗️ Panduan Desain Arsitektur Modern\\n\\n- **Clean Architecture / Hexagonal**: Pisahkan domain logic dari framework & database driver.\\n- **Idempotency**: Selalu rancang POST webhook / payment APIs dengan idempotency key.\\n- **Observability**: Lengkapi logging terstruktur dengan Correlation / Trace ID di tiap layer.';\n  chips = ['Detail implementasi Idempotency', 'Rekomendasi Caching Redis', 'Contoh Clean Architecture TS'];\n} else {\n  reply = `### 💻 Mentor Feedback\\n\\nTopik yang kamu ajukan: \\\"${$json.body.message}\\\".\\n\\nMari kita bedah solusi terbaik dari segi **Maintainability**, **Scalability**, dan **Clean Code Principles**. Apa kendala teknis spesifik yang kamu temui?`;\n  chips = ['Review kompleksitas algoritma (Big-O)', 'Tips unit testing dengan Vitest', 'Strategi error handling elegan'];\n}\n\nreturn { json: { content: reply, chips: chips } };"
+      },
+      "name": "Mentor Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Mentor Logic", "type": "main", "index": 0 }]]
+    },
+    "Mentor Logic": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

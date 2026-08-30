@@ -1,0 +1,121 @@
+{
+  "bots": [
+    {
+      "id": "bot-dungeon-rpg",
+      "name": "Dungeon & Shadow Quest",
+      "genre": "RPG & Gaming",
+      "category": "RPG & Gaming",
+      "author": "Valdorath Master",
+      "description": "AI Game Master yang memandu takdir karaktermu di labirin kuno Valdorath dengan sistem inventaris dan konsekuensi naratif.",
+      "apiUrl": "http://localhost:3001/webhook/dungeon-rpg",
+      "apiKey": "sk-sample-rpg-key",
+      "avatarUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=150&auto=format&fit=crop&q=80",
+      "coverUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80",
+      "themeColor": "#d97706",
+      "themeColorDark": "#fbbf24",
+      "isFeatured": true,
+      "initialMessage": "⚔️ **Salam petualang!** Kamu terbangun di depan gerbang batu labirin *Valdorath*. Obor di tanganmu mulai redup. Di depanmu terdapat dua lorong: satu berbau lumut basah, dan satu lagi memancarkan cahaya ungu misterius.\n\nApa tindakan pertamamu?",
+      "initialChips": [
+        "🔥 Masuk ke lorong bercahaya ungu",
+        "🛡️ Masuk ke lorong berlumut dengan waspada",
+        "🎒 Periksa isi ransel petualang"
+      ],
+      "changeSummary": "Initial release of Dungeon & Shadow Quest with interactive branching",
+      "n8nWorkflow": "{\n  \"name\": \"Dungeon RPG Chatbot Webhook\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"dungeon-rpg\",\n        \"responseMode\": \"responseNode\",\n        \"options\": {}\n      },\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 1,\n      \"position\": [240, 300]\n    },\n    {\n      \"parameters\": {\n        \"model\": \"gpt-4o-mini\",\n        \"promptType\": \"define\",\n        \"text\": \"={{ $json.body.message }}\"\n      },\n      \"name\": \"AI Agent\",\n      \"type\": \"@n8n/n8n-nodes-langchain.agent\",\n      \"typeVersion\": 1.6,\n      \"position\": [460, 300]\n    },\n    {\n      \"parameters\": {\n        \"respondWith\": \"json\",\n        \"responseBody\": \"={\\n  \\\"content\\\": $json.output,\\n  \\\"chips\\\": [\\\"Lanjut petualangan\\\", \\\"Lihat inventaris\\\", \\\"Gunakan mantra\\\"]\\n}\"\n      },\n      \"name\": \"Respond to Webhook\",\n      \"type\": \"n8n-nodes-base.respondToWebhook\",\n      \"typeVersion\": 1,\n      \"position\": [700, 300]\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"AI Agent\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"AI Agent\": {\n      \"main\": [[{ \"node\": \"Respond to Webhook\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}"
+    },
+    {
+      "id": "bot-cyberpunk-noir",
+      "name": "Cyberpunk Noir 2088",
+      "genre": "RPG & Gaming",
+      "category": "RPG & Gaming",
+      "author": "Detektif Vane",
+      "description": "Interogasi saksi android, analisis bukti cybernetic terenkripsi, dan pecahkan konspirasi pembunuhan CEO Synthetica Corp di Neo-Jakarta.",
+      "apiUrl": "http://localhost:3001/webhook/cyberpunk-noir",
+      "apiKey": "sk-sample-cyber-key",
+      "avatarUrl": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&auto=format&fit=crop&q=80",
+      "coverUrl": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80",
+      "themeColor": "#0891b2",
+      "themeColorDark": "#22d3ee",
+      "isFeatured": true,
+      "initialMessage": "🌃 Hujan asam mengguyur distrik *Glodok 2088*. Tubuh CEO Synthetica Corp terbujur kaku di penthouse lantai 80 dengan chip memori yang sengaja dibakar EMP.\n\nKamu adalah Detektif Swasta Vane. Saksi di ruangan ini adalah android pelayan model K-9. Apa yang ingin kamu selidiki lebih dulu?",
+      "initialChips": [
+        "🔍 Pindai chip memori korban dengan scanner",
+        "🤖 Interogasi android pelayan K-9",
+        "🚪 Periksa rekaman kamera pintu masuk"
+      ],
+      "changeSummary": "Initial release with Cyberpunk mystery plotline and forensic clue engine",
+      "n8nWorkflow": "{\n  \"name\": \"Cyberpunk Noir Webhook\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"cyberpunk-noir\",\n        \"responseMode\": \"responseNode\",\n        \"options\": {}\n      },\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 1,\n      \"position\": [240, 300]\n    },\n    {\n      \"parameters\": {\n        \"respondWith\": \"json\",\n        \"responseBody\": \"={\\n  \\\"content\\\": \\\"Detektif Vane memeriksa petunjuk...\\\",\\n  \\\"chips\\\": [\\\"Interogasi K-9\\\", \\\"Cari jejak EMP\\\", \\\"Hubungi markas\\\"]\\n}\"\n      },\n      \"name\": \"Respond to Webhook\",\n      \"type\": \"n8n-nodes-base.respondToWebhook\",\n      \"typeVersion\": 1,\n      \"position\": [500, 300]\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"Respond to Webhook\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}"
+    },
+    {
+      "id": "bot-island-survival",
+      "name": "Island 404: Survival",
+      "genre": "Productivity",
+      "category": "RPG & Gaming",
+      "author": "Survivalist Guild",
+      "description": "Simulasi bertahan hidup berbasis teks di pulau terpencil. Kelola rasa lapar, stamina, crafting tempat berlindung, dan cuaca ekstrem.",
+      "apiUrl": "http://localhost:3001/webhook/island-survival",
+      "apiKey": "sk-sample-island-key",
+      "avatarUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=150&auto=format&fit=crop&q=80",
+      "coverUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80",
+      "themeColor": "#059669",
+      "themeColorDark": "#34d399",
+      "isFeatured": false,
+      "initialMessage": "🏝️ **Kapalmu karam!** Kamu terdampar di pantai berpasir hitam. Hari mulai sore (Pukul 16:30), perutmu lapar, dan awan mendung menandakan badai tropis akan tiba dalam 2 jam.\n\nApa tindakan utamamu sebelum gelap?",
+      "initialChips": [
+        "🪵 Kumpulkan kayu & bangun tempat berteduh",
+        "🥥 Cari kelapa & sumber air tawar",
+        "🔥 Coba buat api unggun di pantai"
+      ],
+      "changeSummary": "Initial release with stamina, weather, and crafting mechanics",
+      "n8nWorkflow": "{\n  \"name\": \"Island Survival Simulator Webhook\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"island-survival\",\n        \"responseMode\": \"responseNode\",\n        \"options\": {}\n      },\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 1,\n      \"position\": [240, 300]\n    },\n    {\n      \"parameters\": {\n        \"respondWith\": \"json\",\n        \"responseBody\": \"={\\n  \\\"content\\\": \\\"Aksi survival berhasil dicatat.\\\",\\n  \\\"chips\\\": [\\\"Istirahat di tenda\\\", \\\"Cari makan\\\", \\\"Nyalakan api\\\"]\\n}\"\n      },\n      \"name\": \"Respond to Webhook\",\n      \"type\": \"n8n-nodes-base.respondToWebhook\",\n      \"typeVersion\": 1,\n      \"position\": [500, 300]\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"Respond to Webhook\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}"
+    },
+    {
+      "id": "bot-codecraft-mentor",
+      "name": "CodeCraft Senior Mentor",
+      "genre": "Coding & Dev",
+      "category": "Coding & Dev",
+      "author": "TechLead AI",
+      "description": "AI Software Architect & Senior Pair Programmer. Membantu code review, arsitektur sistem, refactoring, dan debugging clean code.",
+      "apiUrl": "http://localhost:3001/webhook/code-mentor",
+      "apiKey": "sk-sample-dev-key",
+      "avatarUrl": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=150&auto=format&fit=crop&q=80",
+      "coverUrl": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80",
+      "themeColor": "#4f46e5",
+      "themeColorDark": "#818cf8",
+      "isFeatured": true,
+      "initialMessage": "💻 Halo Developer! Saya **CodeCraft**, AI Senior Software Engineer & Mentor teknismu. Saya siap membantumu mendesain arsitektur, mereview kode, atau memecahkan bug kompleks.\n\nApa topik yang ingin kita diskusikan hari ini?",
+      "initialChips": [
+        "⚡ Review kode TypeScript/React",
+        "🏗️ Desain arsitektur REST / Microservices",
+        "🐛 Debugging performa & memory leak",
+        "📐 Best practice Clean Code & SOLID"
+      ],
+      "changeSummary": "Initial release with code review templates and debugging suggestions",
+      "n8nWorkflow": "{\n  \"name\": \"CodeCraft Mentor Webhook\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"code-mentor\",\n        \"responseMode\": \"responseNode\",\n        \"options\": {}\n      },\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 1,\n      \"position\": [240, 300]\n    },\n    {\n      \"parameters\": {\n        \"respondWith\": \"json\",\n        \"responseBody\": \"={\\n  \\\"content\\\": \\\"Berikut adalah analisis kode dan rekomendasi perbaikan...\\\",\\n  \\\"chips\\\": [\\\"Beri contoh implementasi\\\", \\\"Optimasi performa\\\", \\\"Buat unit test\\\"]\\n}\"\n      },\n      \"name\": \"Respond to Webhook\",\n      \"type\": \"n8n-nodes-base.respondToWebhook\",\n      \"typeVersion\": 1,\n      \"position\": [500, 300]\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"Respond to Webhook\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}"
+    },
+    {
+      "id": "bot-trivia-duel",
+      "name": "Trivia Duel Master",
+      "genre": "Education",
+      "category": "Education",
+      "author": "QuizBot3000",
+      "description": "Uji wawasan umum, sains, sejarah, pop culture, dan logika dalam format kuis interaktif dengan skor poin real-time.",
+      "apiUrl": "http://localhost:3001/webhook/trivia-duel",
+      "apiKey": "sk-sample-trivia-key",
+      "avatarUrl": "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=150&auto=format&fit=crop&q=80",
+      "coverUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80",
+      "themeColor": "#7c3aed",
+      "themeColorDark": "#a78bfa",
+      "isFeatured": false,
+      "initialMessage": "🧠 **Selamat datang di Trivia Duel Master!** Saya *QuizBot3000*, pemandu kuis interaktifmu.\n\n**Babak 1 (Sains):**\n*Planet manakah di tata surya kita yang memiliki julukan Planet Merah karena kandungan besi oksidanya?*",
+      "initialChips": [
+        "A. Venus",
+        "B. Mars",
+        "C. Jupiter",
+        "D. Merkurius"
+      ],
+      "changeSummary": "Initial release with interactive quiz scoring and multi-category questions",
+      "n8nWorkflow": "{\n  \"name\": \"Trivia Duel Master Webhook\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"trivia-duel\",\n        \"responseMode\": \"responseNode\",\n        \"options\": {}\n      },\n      \"name\": \"Webhook\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 1,\n      \"position\": [240, 300]\n    },\n    {\n      \"parameters\": {\n        \"respondWith\": \"json\",\n        \"responseBody\": \"={\\n  \\\"content\\\": \\\"Jawaban tepat! Skor Anda bertambah.\\\",\\n  \\\"chips\\\": [\\\"Pertanyaan Berikutnya\\\", \\\"Lihat Skor Total\\\", \\\"Ganti Kategori\\\"]\\n}\"\n      },\n      \"name\": \"Respond to Webhook\",\n      \"type\": \"n8n-nodes-base.respondToWebhook\",\n      \"typeVersion\": 1,\n      \"position\": [500, 300]\n    }\n  ],\n  \"connections\": {\n    \"Webhook\": {\n      \"main\": [[{ \"node\": \"Respond to Webhook\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}"
+    }
+  ]
+}

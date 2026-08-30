@@ -1,0 +1,45 @@
+{
+  "name": "Trivia Duel Master Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "trivia-duel",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = ($json.body.message || '').toLowerCase();\nlet reply = '';\nlet chips = [];\n\nif (message.includes('mars') || message.includes('b.') || message.includes('b')) {\n  reply = '🎉 **LUAR BIASA, TEPAT SEKALI!**\\nJawabannya adalah **B. Mars** (warna merah berasal dari besi oksida/karat di tanahnya).\\n\\n**+100 Poin untukmu!**\\n\\n---\\n\\n**Babak 2 (Sejarah & Komputasi):**\\n*Siapakah matematikawan dan ilmuwan komputer yang memecahkan kode Enigma pada Perang Dunia II?*';\n  chips = ['Alan Turing', 'Charles Babbage', 'Ada Lovelace', 'John von Neumann'];\n} else if (message.includes('turing')) {\n  reply = '🏆 **BENAR LAGI!**\\n**Alan Turing** adalah tokoh kunci di Bletchley Park yang memecahkan mesin Enigma!\\n\\n**Total Skor: 200 Poin!**\\n\\n---\\n\\n**Babak 3 (Geografi):**\\n*Danau terdalam di dunia yang menampung 20% air tawar tak beku di bumi adalah?*';\n  chips = ['Danau Baikal', 'Danau Toba', 'Danau Victoria', 'Danau Superior'];\n} else {\n  reply = `Jawaban/Respons tercatat: \\\"${$json.body.message}\\\".\\n\\nMari lanjutkan ke tantangan kuis berikutnya! Pilih kategori yang ingin kamu taklukkan:`;\n  chips = ['Sains & Antariksa', 'Sejarah Dunia', 'Teknologi & AI', 'Pop Culture & Film'];\n}\n\nreturn { json: { content: reply, chips: chips } };"
+      },
+      "name": "Trivia Game Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Trivia Game Engine", "type": "main", "index": 0 }]]
+    },
+    "Trivia Game Engine": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

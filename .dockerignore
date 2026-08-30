@@ -1,0 +1,11 @@
+node_modules
+chatbotgallery/node_modules
+chatbotgallery/dist
+.git
+.gitignore
+.tanstack
+*.log
+local.db
+chatbotgallery/local.db
+.env
+.env.local
