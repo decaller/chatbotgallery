@@ -1,0 +1,59 @@
+{
+  "name": "GlobeTrekker: World Country Explorer (Open Country Intelligence)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "globetrekker-countries",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://raw.githubusercontent.com/mledoze/countries/master/countries.json",
+        "options": {}
+      },
+      "name": "Fetch World Countries Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const query = ($('Webhook').first().json.body?.message || '').toLowerCase().replace(/^(profil negara|negara|country|profil|info)\\s*/i, '').replace(/^[\"']|[\"']$/g, '').trim() || 'japan';\nconst list = Array.isArray($json) ? $json : [$json];\n\nconst matched = list.find(c => \n  c.name?.common?.toLowerCase() === query ||\n  c.cca2?.toLowerCase() === query ||\n  c.cca3?.toLowerCase() === query ||\n  (c.capital && c.capital.some(cap => cap.toLowerCase() === query)) ||\n  c.name?.common?.toLowerCase().includes(query)\n) || list.find(c => c.name?.common?.toLowerCase() === 'japan');\n\nconst cap = matched.capital ? matched.capital.join(', ') : 'N/A';\nconst cur = matched.currencies ? Object.values(matched.currencies).map(c => `${c.name} (${c.symbol || '-'})`).join(', ') : 'N/A';\nconst lang = matched.languages ? Object.values(matched.languages).join(', ') : 'N/A';\n\nlet content = `🌍 **[PROFIL NEGARA: ${matched.flag || '🏳️'} ${matched.name.common.toUpperCase()}]**\\n\\n`;\ncontent += `🏛️ **Nama Resmi:** *${matched.name.official}*\\n`;\ncontent += `- **Ibukota:** 📍 **${cap}**\\n`;\ncontent += `- **Kawasan:** 🗺️ **${matched.region} (${matched.subregion || ''})**\\n`;\ncontent += `- **Luas Wilayah:** 📐 **${matched.area ? matched.area.toLocaleString() + ' km²' : 'N/A'}**\\n`;\ncontent += `- **Bahasa Resmi:** 🗣️ **${lang}**\\n`;\ncontent += `- **Mata Uang:** 💵 **${cur}**\\n`;\ncontent += `- **Perbatasan:** 🧭 *${matched.borders && matched.borders.length > 0 ? matched.borders.join(', ') : 'Negara Kepulauan'}*\\n`;\n\nconst chips = ['🇯🇵 Profil Negara \"Japan\"', '🇮🇩 Profil Negara \"Indonesia\"', '🇩🇪 Profil Negara \"Germany\"', '🇧🇷 Profil Negara \"Brazil\"'];\nreturn { json: { content, chips } };"
+      },
+      "name": "Lookup Country & Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [920, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Fetch World Countries Data", "type": "main", "index": 0 }]]
+    },
+    "Fetch World Countries Data": {
+      "main": [[{ "node": "Lookup Country & Format", "type": "main", "index": 0 }]]
+    },
+    "Lookup Country & Format": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

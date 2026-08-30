@@ -1,0 +1,59 @@
+{
+  "name": "Al-Ma'tsurat & Doa Harian (EQuran.id Doa API)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "doa-dzikir",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://equran.id/api/doa",
+        "options": {}
+      },
+      "name": "Fetch Doa Collection",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const query = ($('Webhook').first().json.body?.message || '').toLowerCase();\nconst list = $json.data || [];\n\nlet matched = list.filter(d => \n  d.nama.toLowerCase().includes(query) || \n  d.grup.toLowerCase().includes(query) || \n  d.idn.toLowerCase().includes(query)\n);\n\nif (matched.length === 0) {\n  matched = [list[0]];\n}\n\nconst doa = matched[0];\nlet content = `🤲 **${doa.nama}**\\n📂 *Kategori: ${doa.grup}*\\n\\n> ### ${doa.ar}\\n\\n`;\nif (doa.tr) content += `*Transliterasi:*\\n**\"${doa.tr}\"**\\n\\n`;\ncontent += `*Artinya:*\\n> \"${doa.idn}\"\\n\\n`;\nif (doa.tentang) content += `📚 *Keterangan:* ${doa.tentang}\\n`;\n\nconst chips = [\n  '🌅 Dzikir Pagi & Petang',\n  '🛌 Doa Sebelum & Bangun Tidur',\n  '🚗 Doa Naik Kendaraan & Safar',\n  '🤲 Doa Kebaikan Dunia Akhirat'\n];\n\nreturn { json: { content, chips } };"
+      },
+      "name": "Filter & Format Doa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [920, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Fetch Doa Collection", "type": "main", "index": 0 }]]
+    },
+    "Fetch Doa Collection": {
+      "main": [[{ "node": "Filter & Format Doa", "type": "main", "index": 0 }]]
+    },
+    "Filter & Format Doa": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

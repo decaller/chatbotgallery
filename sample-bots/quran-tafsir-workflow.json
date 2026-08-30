@@ -1,0 +1,71 @@
+{
+  "name": "Nur Al-Quran & Tafsir Explorer (EQuran.id API v2)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "quran-tafsir",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract surah query or number from message\nconst raw = ($json.body?.message || '').toLowerCase();\nconst isTafsir = raw.includes('tafsir');\n\nconst surahMap = {\n  'al-fatihah': 1, 'fatihah': 1, 'al-baqarah': 2, 'baqarah': 2,\n  'ali imran': 3, 'an-nisa': 4, 'al-maidah': 5, 'al-kahf': 18,\n  'kahfi': 18, 'maryam': 19, 'taha': 20, 'ya-sin': 36, 'yasin': 36,\n  'ar-rahman': 55, 'rahman': 55, 'al-waqiah': 56, 'waqiah': 56,\n  'al-mulk': 67, 'mulk': 67, 'an-naba': 78, 'al-ikhlas': 112,\n  'al-falaq': 113, 'an-nas': 114\n};\n\nlet surahNo = 1;\nconst numMatch = raw.match(/\\b([1-9]|[1-9]\\d|10\\d|11[0-4])\\b/);\nif (numMatch) {\n  surahNo = parseInt(numMatch[1], 10);\n} else {\n  for (const [name, num] of Object.entries(surahMap)) {\n    if (raw.includes(name)) {\n      surahNo = num;\n      break;\n    }\n  }\n}\n\nreturn {\n  json: {\n    surahNo,\n    isTafsir,\n    apiUrl: isTafsir \n      ? `https://equran.id/api/v2/tafsir/${surahNo}`\n      : `https://equran.id/api/v2/surat/${surahNo}`\n  }\n};"
+      },
+      "name": "Parse Surah Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.apiUrl }}",
+        "options": {}
+      },
+      "name": "Fetch EQuran.id API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const isTafsir = $('Parse Surah Query').first().json.isTafsir;\nconst data = $json.data || {};\n\nif (isTafsir) {\n  const sampleTafsir = (data.tafsir || []).slice(0, 3);\n  let content = `📜 **Tafsir Kemenag RI: QS. ${data.namaLatin} (${data.nomor}) - ${data.nama}**\\n\\n`;\n  content += `*Arti:* \"${data.arti}\" | *Golongan:* Surat ${data.tempatTurun} (${data.jumlahAyat} Ayat)\\n\\n`;\n  content += `> **Deskripsi:** ${(data.deskripsi || '').replace(/<[^>]+>/g, '')}\\n\\n---\\n\\n### 📖 Tafsir Ayat:\\n\\n`;\n  for (const t of sampleTafsir) {\n    content += `**Ayat ke-${t.ayat}:**\\n${t.teks.substring(0, 250)}...\\n\\n`;\n  }\n  return { json: { content, chips: [`📖 Baca Teks & Audio QS. ${data.namaLatin}`, '✨ Surat Al-Kahf (18)', '🌟 Surat Ya-Sin (36)', '👑 Surat Al-Mulk (67)'] } };\n} else {\n  const displayAyat = (data.ayat || []).slice(0, 4);\n  let content = `📖 **QS. ${data.namaLatin} (${data.nomor}) - ${data.nama}**\\n\\n`;\n  content += `*Arti:* **\"${data.arti}\"** | *Tempat Turun:* **${data.tempatTurun}** (${data.jumlahAyat} Ayat)\\n\\n---\\n\\n### 📜 Cuplikan Ayat:\\n\\n`;\n  for (const a of displayAyat) {\n    content += `**[Ayat ${a.nomorAyat}]**\\n> ### ${a.teksArab}\\n*${a.teksLatin}*\\n\\n**Artinya:** \"${a.teksIndonesia}\"\\n\\n`;\n  }\n  const audioUrl = data.audioFull ? Object.values(data.audioFull)[0] : '';\n  if (audioUrl) {\n    content += `🔊 **Audio Murottal:** [Dengarkan Tilawah Syaikh Abdullah Al-Juhany](${audioUrl})\\n`;\n  }\n  return { json: { content, chips: [`📜 Baca Tafsir QS. ${data.namaLatin}`, '✨ Baca Surat Al-Kahf (18)', '🌟 Baca Surat Ya-Sin (36)', '👑 Baca Surat Al-Mulk (67)'] } };\n}"
+      },
+      "name": "Format Quran Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1140, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Parse Surah Query", "type": "main", "index": 0 }]]
+    },
+    "Parse Surah Query": {
+      "main": [[{ "node": "Fetch EQuran.id API", "type": "main", "index": 0 }]]
+    },
+    "Fetch EQuran.id API": {
+      "main": [[{ "node": "Format Quran Response", "type": "main", "index": 0 }]]
+    },
+    "Format Quran Response": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

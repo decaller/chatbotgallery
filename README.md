@@ -47,10 +47,17 @@ chatBotGallery/
 
 ## 🎮 Sample Bots
 
-We have created 7 sample bots featuring diverse workflow implementation models and complexity tiers:
+We have created 14 sample bots featuring diverse workflow implementation models, public API integrations, and complexity tiers:
 
 | Bot Name | Category | Implementation Type | Description |
 | :--- | :--- | :--- | :--- |
+| **SkyWatch Global Weather** | `Productivity` | **Open-Meteo API** (Live Weather & Geocoding) | Prakiraan cuaca global real-time, suhu (°C), kelembapan, kecepatan angin, curah hujan, dan indeks cuaca WMO untuk ribuan kota dunia via Open-Meteo API. |
+| **Alexandria Book Finder** | `Education` | **Open Library API** (Live Books Search & Covers) | Pustakawan digital untuk mencari jutaan katalog buku dunia, penulis, tahun terbit, edisi ISBN, dan ringkasan karya sastra via Open Library REST API. |
+| **Prof. Oak's Smart Pokédex** | `RPG & Gaming` | **PokéAPI v2** (Live Pokémon Dex & Stats) | Ensiklopedia Pokémon & Pokédex interaktif: statistik battle (HP, Attack, Speed), tipe elemen, ability, official artwork, dan data evolusi via PokéAPI v2. |
+| **GlobeTrekker Country Explorer** | `Education` | **REST Countries** (Open Geo Intelligence) | Eksplorasi data geografi dan profil 250+ negara di dunia: ibukota, populasi, luas wilayah, mata uang, bahasa resmi, zona waktu, dan negara tetangga perbatasan. |
+| **Nur Al-Quran & Tafsir** | `Education` | **EQuran.id API v2** (Live HTTP Integration) | Penjelajah ayat suci Al-Quran, terjemahan Kemenag RI, audio murottal 5 qari ternama, dan ulasan tafsir via API equran.id v2. |
+| **Al-Ma'tsurat & Doa Harian** | `Education` | **EQuran.id Doa API** (Live HTTP Integration) | Koleksi 228+ doa harian, dzikir pagi-petang, dan wirid ibadah shahih lengkap dengan teks Arab, transliterasi Latin, dan arti. |
+| **Muazzin & Jadwal Shalat 2026** | `Productivity` | **EQuran.id Shalat API** (Live HTTP Integration) | Jadwal shalat 5 waktu, waktu imsak, syuruq, dan dhuha untuk 517 kabupaten/kota di seluruh Indonesia tahun 2026. |
 | **Dungeon & Shadow Quest** | `RPG & Gaming` | **No-Code AI Agent** (Zero Code) | Pure n8n LangChain AI Agent node connected to an OpenAI Chat Model without custom scripts. |
 | **Cyberpunk Noir 2088** | `RPG & Gaming` | **Python Engine** (n8n Python) | Uses n8n Code node in Python runtime for regex clue matching and forensic text analysis. |
 | **Island 404: Survival** | `Productivity / RPG` | **Low-Code JS** (A bit of JS) | Minimalistic 5-line JavaScript filter classifying survival actions, stamina, and weather threats. |

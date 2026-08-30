@@ -1,0 +1,71 @@
+{
+  "name": "Alexandria Book Finder & Librarian (Open Library API)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "alexandria-books",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = ($json.body?.message || '').trim();\nconst query = raw.replace(/^(cari buku|buku|karya|novel|author|search)\\s*/i, '').replace(/^[\"']|[\"']$/g, '').trim() || 'Dune';\nreturn { json: { query, searchUrl: `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=4` } };"
+      },
+      "name": "Prepare Search Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.searchUrl }}",
+        "options": {}
+      },
+      "name": "Search Open Library",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const docs = $json.docs || [];\nif (docs.length === 0) {\n  return { json: { content: '📚 Buku tidak ditemukan di katalog Open Library.', chips: ['🔍 Cari Buku \"Harry Potter\"', '🔍 Cari Buku \"Dune\"'] } };\n}\nconst b = docs[0];\nconst author = b.author_name ? b.author_name.join(', ') : 'Unknown';\nlet content = `📚 **[KATALOG OPEN LIBRARY: ${b.title}]**\\n\\n`;\ncontent += `- **Penulis:** ✍️ **${author}**\\n`;\ncontent += `- **Tahun Terbit:** 🗓️ **${b.first_publish_year || 'N/A'}**\\n`;\ncontent += `- **Total Edisi:** 📑 **${b.edition_count || 1} edisi**\\n\\n`;\nif (b.cover_i) {\n  content += `🖼️ **Cover:** [Lihat Cover](${`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`})\\n\\n`;\n}\nconst chips = ['🔍 Cari Buku \"Harry Potter\"', '🔍 Cari Buku \"The Hobbit\"', '🔍 Cari Buku \"1984\"', '📖 Rekomendasi Sci-Fi'];\nreturn { json: { content, chips } };"
+      },
+      "name": "Format Book Details",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1140, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Prepare Search Query", "type": "main", "index": 0 }]]
+    },
+    "Prepare Search Query": {
+      "main": [[{ "node": "Search Open Library", "type": "main", "index": 0 }]]
+    },
+    "Search Open Library": {
+      "main": [[{ "node": "Format Book Details", "type": "main", "index": 0 }]]
+    },
+    "Format Book Details": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

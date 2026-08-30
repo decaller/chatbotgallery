@@ -1,0 +1,71 @@
+{
+  "name": "Professor Oak's Smart Pokédex (PokéAPI v2)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "professor-pokedex",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = ($json.body?.message || '').toLowerCase();\nconst name = raw.replace(/^(analisa|cek|pokemon|pokédex|pokedex|stats|info)\\s*/i, '').replace(/^[\"']|[\"']$/g, '').replace(/#\\d+/g, '').trim() || 'pikachu';\nreturn { json: { name, pokeUrl: `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(name)}` } };"
+      },
+      "name": "Parse Pokémon Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.pokeUrl }}",
+        "options": {}
+      },
+      "name": "Fetch PokéAPI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = $json;\nconst types = (p.types || []).map(t => t.type.name).join(' / ');\nconst stats = {};\n(p.stats || []).forEach(s => { stats[s.stat.name] = s.base_stat; });\n\nlet content = `🔴⚪ **[POKÉDEX: #${p.id} ${p.name.toUpperCase()}]**\\n\\n`;\ncontent += `- **Tipe:** **${types}**\\n`;\ncontent += `- **Ukuran:** 📏 **${(p.height/10).toFixed(1)} m** / ⚖️ **${(p.weight/10).toFixed(1)} kg**\\n\\n`;\ncontent += `### ⚔️ Base Stats:\\n`;\ncontent += `- **HP:** ${stats.hp || 0} | **Attack:** ${stats.attack || 0} | **Defense:** ${stats.defense || 0}\\n`;\ncontent += `- **Sp. Atk:** ${stats['special-attack'] || 0} | **Sp. Def:** ${stats['special-defense'] || 0} | **Speed:** ${stats.speed || 0}\\n\\n`;\n\nconst sprite = p.sprites?.other?.['official-artwork']?.front_default || p.sprites?.front_default;\nif (sprite) content += `🖼️ **Artwork:** [Lihat Sprite Resmi](${sprite})\\n`;\n\nconst chips = ['⚡ Analisa \"Pikachu\"', '🔥 Analisa \"Charizard\"', '💧 Analisa \"Greninja\"', '🔮 Analisa \"Mewtwo\"'];\nreturn { json: { content, chips } };"
+      },
+      "name": "Format Pokédex Entry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1140, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Parse Pokémon Query", "type": "main", "index": 0 }]]
+    },
+    "Parse Pokémon Query": {
+      "main": [[{ "node": "Fetch PokéAPI", "type": "main", "index": 0 }]]
+    },
+    "Fetch PokéAPI": {
+      "main": [[{ "node": "Format Pokédex Entry", "type": "main", "index": 0 }]]
+    },
+    "Format Pokédex Entry": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

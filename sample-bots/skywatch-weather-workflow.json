@@ -1,0 +1,85 @@
+{
+  "name": "SkyWatch Global Weather Forecaster (Open-Meteo API)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "skywatch-weather",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = ($json.body?.message || '').trim();\nconst city = raw.replace(/^(cuaca di|cuaca|weather in|weather|info cuaca)\\s*/i, '').trim() || 'Jakarta';\nreturn { json: { city, geoUrl: `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json` } };"
+      },
+      "name": "Extract Location Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.geoUrl }}",
+        "options": {}
+      },
+      "name": "Geocode Location",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.open-meteo.com/v1/forecast?latitude={{ $json.results[0].latitude }}&longitude={{ $json.results[0].longitude }}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto",
+        "options": {}
+      },
+      "name": "Fetch Forecast Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const geo = $('Geocode Location').first().json.results?.[0] || { name: 'Lokasi', country: '' };\nconst cur = $json.current || {};\nconst daily = $json.daily || {};\n\nlet content = `🌤️ **[LAPORAN CUACA: ${geo.name}, ${geo.country}]**\\n\\n`;\ncontent += `- **Suhu:** 🌡️ **${cur.temperature_2m}°C** *(Feels like: ${cur.apparent_temperature}°C)*\\n`;\ncontent += `- **Kelembapan:** 💧 **${cur.relative_humidity_2m}%**\\n`;\ncontent += `- **Kecepatan Angin:** 💨 **${cur.wind_speed_10m} km/h**\\n`;\ncontent += `- **Curah Hujan:** 🌧️ **${cur.precipitation} mm**\\n\\n`;\n\nif (daily.time) {\n  content += `### 📅 Prakiraan 3 Hari:\\n`;\n  for (let i = 0; i < Math.min(3, daily.time.length); i++) {\n    content += `- **${daily.time[i]}:** ${daily.temperature_2m_min[i]}°C s/d ${daily.temperature_2m_max[i]}°C\\n`;\n  }\n}\n\nconst chips = ['📍 Cuaca Tokyo', '📍 Cuaca London', '📍 Cuaca New York', '📍 Cuaca Mekkah'];\nreturn { json: { content, chips } };"
+      },
+      "name": "Format Weather Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1160, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1380, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Extract Location Query", "type": "main", "index": 0 }]]
+    },
+    "Extract Location Query": {
+      "main": [[{ "node": "Geocode Location", "type": "main", "index": 0 }]]
+    },
+    "Geocode Location": {
+      "main": [[{ "node": "Fetch Forecast Data", "type": "main", "index": 0 }]]
+    },
+    "Fetch Forecast Data": {
+      "main": [[{ "node": "Format Weather Output", "type": "main", "index": 0 }]]
+    },
+    "Format Weather Output": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}

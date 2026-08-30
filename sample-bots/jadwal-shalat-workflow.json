@@ -1,0 +1,74 @@
+{
+  "name": "Muazzin: Jadwal Shalat 2026 (EQuran.id Shalat API)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jadwal-shalat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = ($json.body?.message || '').toLowerCase();\n\nlet provinsi = 'DKI Jakarta';\nlet kabkota = 'Kota Jakarta';\n\nif (msg.includes('bandung')) { provinsi = 'Jawa Barat'; kabkota = 'Kota Bandung'; }\nelse if (msg.includes('surabaya')) { provinsi = 'Jawa Timur'; kabkota = 'Kota Surabaya'; }\nelse if (msg.includes('jogja') || msg.includes('yogyakarta')) { provinsi = 'DI Yogyakarta'; kabkota = 'Kota Yogyakarta'; }\nelse if (msg.includes('medan')) { provinsi = 'Sumatera Utara'; kabkota = 'Kota Medan'; }\nelse if (msg.includes('semarang')) { provinsi = 'Jawa Tengah'; kabkota = 'Kota Semarang'; }\nelse if (msg.includes('makassar')) { provinsi = 'Sulawesi Selatan'; kabkota = 'Kota Makassar'; }\nelse if (msg.includes('bogor')) { provinsi = 'Jawa Barat'; kabkota = 'Kota Bogor'; }\n\nconst now = new Date();\nreturn {\n  json: {\n    provinsi,\n    kabkota,\n    bulan: now.getMonth() + 1,\n    tahun: now.getFullYear(),\n    currentDate: now.getDate()\n  }\n};"
+      },
+      "name": "Detect City & Province",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://equran.id/api/v2/shalat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"provinsi\": \"{{ $json.provinsi }}\",\n  \"kabkota\": \"{{ $json.kabkota }}\",\n  \"bulan\": {{ $json.bulan }},\n  \"tahun\": {{ $json.tahun }}\n}",
+        "options": {}
+      },
+      "name": "Fetch Shalat API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cityInfo = $('Detect City & Province').first().json;\nconst data = $json.data || {};\nconst jadwal = (data.jadwal || []).find(j => j.tanggal === cityInfo.currentDate) || (data.jadwal || [])[0] || {};\n\nlet content = `🕌 **Jadwal Shalat Hari Ini - ${cityInfo.kabkota}**\\n`;\ncontent += `📍 *Provinsi: ${cityInfo.provinsi}* | 📅 *${jadwal.hari || 'Hari Ini'}, ${jadwal.tanggal_lengkap}*\\n\\n`;\ncontent += `| Waktu Shalat | Jam (Waktu Lokal) |\\n`;\ncontent += `| :--- | :--- |\\n`;\ncontent += `| 🌌 **Imsak** | \\`${jadwal.imsak || '04:35'}\\` |\\n`;\ncontent += `| 🌅 **Subuh** | \\`${jadwal.subuh || '04:45'}\\` |\\n`;\ncontent += `| ☀️ **Terbit (Syuruq)** | \\`${jadwal.terbit || '06:00'}\\` |\\n`;\ncontent += `| 🌤️ **Dhuha** | \\`${jadwal.dhuha || '06:29'}\\` |\\n`;\ncontent += `| ☀️ **Dzuhur** | \\`${jadwal.dzuhur || '12:03'}\\` |\\n`;\ncontent += `| ⛅ **Ashar** | \\`${jadwal.ashar || '15:24'}\\` |\\n`;\ncontent += `| 🌇 **Maghrib** | \\`${jadwal.maghrib || '17:58'}\\` |\\n`;\ncontent += `| 🌃 **Isya** | \\`${jadwal.isya || '19:09'}\\` |\\n\\n`;\ncontent += `> 💡 *Sumber: Kementerian Agama RI via EQuran.id Shalat API*\\n`;\n\nconst chips = [\n  '📍 Jadwal Shalat Kota Bandung',\n  '📍 Jadwal Shalat Kota Surabaya',\n  '📍 Jadwal Shalat Kota Yogyakarta',\n  '📍 Jadwal Shalat Kota Medan'\n];\n\nreturn { json: { content, chips } };"
+      },
+      "name": "Format Shalat Table",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1140, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Detect City & Province", "type": "main", "index": 0 }]]
+    },
+    "Detect City & Province": {
+      "main": [[{ "node": "Fetch Shalat API", "type": "main", "index": 0 }]]
+    },
+    "Fetch Shalat API": {
+      "main": [[{ "node": "Format Shalat Table", "type": "main", "index": 0 }]]
+    },
+    "Format Shalat Table": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  }
+}
