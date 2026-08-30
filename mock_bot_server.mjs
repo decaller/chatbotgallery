@@ -243,6 +243,98 @@ const BOT_HANDLERS = {
       }
     }
   },
+
+  "inventory-tracker": (message) => {
+    const lower = (message || "").toLowerCase()
+
+    // Simulated n8n Data Table query
+    const DATA_TABLE_PRODUCTS = [
+      {
+        keyword: "4090",
+        name: "ASUS ROG Strix GeForce RTX 4090 24GB Gaming OC",
+        sku: "GPU-NV-4090-ROG",
+        price: "Rp 32.499.000",
+        stock: 4,
+        warranty: "3 Tahun Resmi ASUS Indonesia",
+      },
+      {
+        keyword: "macbook",
+        name: "Apple MacBook Pro 16\" (M3 Max, 36GB RAM, 1TB SSD)",
+        sku: "LAP-APL-MBP16-M3M",
+        price: "58.999.000",
+        stock: 7,
+        warranty: "1 Tahun Resmi iBox / Apple",
+      },
+      {
+        keyword: "keyboard",
+        name: "Keychron Q1 Pro Wireless Custom Mechanical Keyboard",
+        sku: "ACC-KCH-Q1PRO-RD",
+        price: "Rp 3.150.000",
+        stock: 12,
+        warranty: "1 Tahun Resmi Keychron Indonesia",
+      },
+    ]
+
+    const DATA_TABLE_ORDERS = [
+      {
+        keyword: "88219",
+        orderId: "NEX-88219",
+        recipient: "Rian Satria",
+        destination: "Jakarta Selatan",
+        courier: "J&T Express Cargo (No Resi: JT9821731102)",
+        status: "🚛 Sedang Dalam Perjalanan ke Hub Transit Kuningan",
+        eta: "Hari Ini, Pukul 15:00 - 17:00 WIB",
+      },
+      {
+        keyword: "90432",
+        orderId: "NEX-90432",
+        recipient: "Jessica Amanda",
+        destination: "Surabaya Timur",
+        courier: "SiCepat BEST (No Resi: 00412891238)",
+        status: "📦 Paket Telah Diterima oleh Yang Bersangkutan",
+        eta: "Tiba Kemarin, 14:32 WIB",
+      },
+    ]
+
+    // 1. Check Product Table
+    const matchedProduct = DATA_TABLE_PRODUCTS.find((p) => lower.includes(p.keyword))
+    if (matchedProduct) {
+      return {
+        content: `📦 **[HASIL QUERY N8N DATA TABLE: KATALOG PRODUK]**\n\n- **Nama Produk:** **${matchedProduct.name}**\n- **SKU:** \`${matchedProduct.sku}\`\n- **Harga:** **${matchedProduct.price}**\n- **Ketersediaan:** 🟢 Ready Stock (**${matchedProduct.stock} unit** di Warehouse Pusat Jakarta)\n- **Garansi:** ${matchedProduct.warranty}`,
+        chips: [
+          "🛒 Buat Link Checkout Instan",
+          "🔍 Cek Stok MacBook Pro M3",
+          "🚚 Cek Resi Pesanan NEX-88219",
+          "📋 Tanya Spesifikasi Komponen",
+        ],
+      }
+    }
+
+    // 2. Check Order Table
+    const matchedOrder = DATA_TABLE_ORDERS.find((o) => lower.includes(o.keyword))
+    if (matchedOrder) {
+      return {
+        content: `🚚 **[HASIL QUERY N8N DATA TABLE: RESI PENGIRIMAN]**\n\n- **No. Pesanan:** \`${matchedOrder.orderId}\`\n- **Penerima:** **${matchedOrder.recipient}** (${matchedOrder.destination})\n- **Ekspedisi:** ${matchedOrder.courier}\n- **Status Terkini:** ${matchedOrder.status}\n- **Estimasi Tiba:** ⏱️ **${matchedOrder.eta}**`,
+        chips: [
+          "📍 Lacak Posisi GPS Kurir",
+          "📞 Hubungi Customer Support",
+          "🔍 Cek Stok RTX 4090",
+          "📦 Cek Resi NEX-90432",
+        ],
+      }
+    }
+
+    // Fallback
+    return {
+      content: `🔍 **Pencarian Data Table**: *"${message}"*\n\nData tidak ditemukan dalam tabel aktif. Silakan pilih SKU produk atau nomor resi contoh berikut untuk mencoba query n8n Data Table:`,
+      chips: [
+        '🔎 Cek Stok "RTX 4090 Gaming OC"',
+        '🔎 Cek Stok "MacBook Pro M3 Max"',
+        '🚚 Cek Resi "NEX-88219"',
+        '📦 Cek Resi "NEX-90432"',
+      ],
+    }
+  },
 }
 
 const server = http.createServer(async (req, res) => {

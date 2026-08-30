@@ -47,7 +47,7 @@ chatBotGallery/
 
 ## 🎮 Sample Bots
 
-We have created 5 sample bots featuring diverse workflow implementation models and complexity tiers:
+We have created 7 sample bots featuring diverse workflow implementation models and complexity tiers:
 
 | Bot Name | Category | Implementation Type | Description |
 | :--- | :--- | :--- | :--- |
@@ -56,6 +56,7 @@ We have created 5 sample bots featuring diverse workflow implementation models a
 | **Island 404: Survival** | `Productivity / RPG` | **Low-Code JS** (A bit of JS) | Minimalistic 5-line JavaScript filter classifying survival actions, stamina, and weather threats. |
 | **Trivia Duel Master** | `Education` | **Simple No-Code Rule Engine** (Zero Code, Zero AI) | Pure n8n `Switch` (conditional branching) and `Set` (Edit Fields) nodes with zero scripts and no AI model. |
 | **Aegis Security Sentinel** | `Utility & Security` | **n8n If Node Engine** (Boolean Logic) | Uses n8n `If` node (True/False conditional branching) to triage critical cyber threats vs routine cloud hardening. |
+| **Nexus Tech & Order Concierge** | `E-Commerce & Support` | **n8n Data Table Engine** (Internal Table Query) | Uses n8n `Data Table` node to query internal tabular product inventory and order delivery tracking. |
 | **CodeCraft Senior Mentor** | `Coding & Dev` | **JavaScript Engine** (Standard JS) | Full JavaScript logic providing TypeScript/React code reviews, refactoring, and SOLID design advice. |
 
 ---

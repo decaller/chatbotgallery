@@ -1,0 +1,124 @@
+{
+  "name": "Nexus Tech Concierge (n8n Data Table Engine)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "inventory-tracker",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTable": {
+          "__rl": true,
+          "value": "nexus_store_inventory",
+          "mode": "name"
+        },
+        "searchMode": "conditions",
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.item_name || $json.order_id }}",
+              "rightValue": "={{ $json.body.message }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "fallbackOutput": "empty"
+        }
+      },
+      "name": "Query n8n Data Table",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "content_builder",
+              "name": "content",
+              "value": "={{ $json.product_name ? '📦 **INFORMASI STOK PRODUK (n8n Data Table)**\\n\\n- **Nama Produk:** ' + $json.product_name + '\\n- **SKU:** `' + $json.sku + '`\\n- **Harga:** ' + $json.price + '\\n- **Status Stok:** ' + ($json.stock > 0 ? '🟢 Ready (' + $json.stock + ' unit di Gudang Utama)' : '🔴 Habis (Restock 2 hari lagi)') + '\\n- **Garansi Resmi:** ' + $json.warranty : ($json.order_id ? '🚚 **STATUS PENGIRIMAN PESANAN (n8n Data Table)**\\n\\n- **No. Resi:** `' + $json.order_id + '`\\n- **Penerima:** ' + $json.recipient + ' (' + $json.destination + ')\\n- **Kurir:** ' + $json.courier + '\\n- **Status:** ' + $json.delivery_status + '\\n- **Estimasi Tiba:** ' + $json.eta : '🔍 **Pencarian Data Table**: *\"' + $json.body.message + '\"*\\n\\nPilih produk atau nomor resi yang ingin dicek:') }}",
+              "type": "string"
+            },
+            {
+              "id": "chips_builder",
+              "name": "chips",
+              "value": "={{ $json.order_id ? ['Lacak Lokasi Kurir Realtime', 'Hubungi Driver Ekspedisi', 'Cek Pesanan Lain'] : ['Beli Sekarang via Checkout', 'Bandingkan dengan Spesifikasi Lain', 'Cek Status Pengiriman Pesanan'] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Format Table Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [960, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Query n8n Data Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query n8n Data Table": {
+      "main": [
+        [
+          {
+            "node": "Format Table Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Table Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
