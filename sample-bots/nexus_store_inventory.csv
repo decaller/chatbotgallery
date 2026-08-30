@@ -1,0 +1,9 @@
+sku,product_name,category,price,stock,warranty,warehouse_location
+GPU-NV-4090-ROG,"ASUS ROG Strix GeForce RTX 4090 24GB Gaming OC",Graphics Card,Rp 32.499.000,4,3 Tahun Resmi ASUS Indonesia,Jakarta Pusat (Hub A)
+GPU-NV-4080-SUPER,"MSI GeForce RTX 4080 SUPER 16GB Ventus 3X",Graphics Card,Rp 18.750.000,8,3 Tahun Resmi MSI Indonesia,Jakarta Pusat (Hub A)
+LAP-APL-MBP16-M3M,"Apple MacBook Pro 16"" (M3 Max, 36GB RAM, 1TB SSD)",Laptop,Rp 58.999.000,7,1 Tahun Resmi iBox / Apple,Jakarta Barat (Hub B)
+LAP-LNV-LEGION7,"Lenovo Legion Pro 7i Gen 9 (Intel i9-14900HX, RTX 4080)",Laptop,Rp 42.500.000,3,3 Tahun Premium Care Lenovo,Surabaya (Hub C)
+ACC-KCH-Q1PRO-RD,"Keychron Q1 Pro Wireless Custom Mechanical Keyboard (Red Switch)",Peripherals,Rp 3.150.000,12,1 Tahun Resmi Keychron Indonesia,Jakarta Pusat (Hub A)
+ACC-LOG-MXM3S,"Logitech MX Master 3S Wireless Performance Mouse",Peripherals,Rp 1.549.000,25,1 Tahun Resmi Logitech,Jakarta Pusat (Hub A)
+MON-DEL-U2723QE,"Dell UltraSharp 27"" 4K USB-C Hub Monitor (U2723QE)",Monitor,Rp 9.850.000,6,3 Tahun Advanced Exchange Dell,Jakarta Selatan (Hub D)
+CPU-AMD-7800X3D,"AMD Ryzen 7 7800X3D 8-Core 16-Thread Processor",Processor,Rp 6.890.000,15,3 Tahun Resmi AMD Indonesia,Jakarta Pusat (Hub A)

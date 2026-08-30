@@ -1,0 +1,5 @@
+order_id,recipient,destination,courier,delivery_status,eta,items_summary
+NEX-88219,Rian Satria,Jakarta Selatan,"J&T Express Cargo (JT9821731102)","🚛 Sedang Dalam Perjalanan ke Hub Transit Kuningan","Hari Ini, 15:00 - 17:00 WIB","1x ASUS ROG RTX 4090 OC"
+NEX-90432,Jessica Amanda,Surabaya Timur,"SiCepat BEST (00412891238)","📦 Paket Telah Diterima oleh Yang Bersangkutan","Tiba Kemarin, 14:32 WIB","1x Keychron Q1 Pro Red Switch"
+NEX-77104,Budi Wicaksono,Bandung Kota,"JNE YES (JNE889012371)","✈️ Tiba di Sortation Center Bandung Gedebage","Besok, 09:00 - 12:00 WIB","1x MacBook Pro 16 M3 Max"
+NEX-65239,Farhan Pratama,Medan Petisah,"Anteraja Reguler (10008472910)","🏢 Dalam Proses Pick-up Kurir Warehouse Jakarta","2 Hari Lagi, 16:00 WIB","2x Logitech MX Master 3S"

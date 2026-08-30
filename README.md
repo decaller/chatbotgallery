@@ -64,12 +64,17 @@ We have created 7 sample bots featuring diverse workflow implementation models a
 ## 🚀 Quick Start Guide
 
 ### 1. Seed the Database
-Populate `local.db` with the 5 sample bots and their version 1 history:
+Populate `local.db` with the 7 sample bots and their version 1 history:
 ```bash
 node seed_bots.mjs
 ```
 
-### 2. Start the Mock Webhook Server (Optional for offline testing)
+### 2. Sample Data for n8n Data Tables
+For the **Nexus Tech & Order Concierge** bot, import the following sample CSV datasets into your n8n Data Table:
+- [`sample-bots/nexus_store_inventory.csv`](sample-bots/nexus_store_inventory.csv): Hardware product catalog (SKU, price, stock, warranty).
+- [`sample-bots/nexus_order_tracking.csv`](sample-bots/nexus_order_tracking.csv): Order delivery tracking (Order ID, recipient, status, ETA).
+
+### 3. Start the Mock Webhook Server (Optional for offline testing)
 Run the local webhook simulator that responds to all sample bot webhook requests:
 ```bash
 node mock_bot_server.mjs
