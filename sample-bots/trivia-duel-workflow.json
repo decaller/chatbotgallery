@@ -1,5 +1,5 @@
 {
-  "name": "Trivia Duel Master (No-Code AI Memory Agent)",
+  "name": "Trivia Duel Master (Simple No-Code Rule Engine)",
   "nodes": [
     {
       "parameters": {
@@ -15,48 +15,101 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.body.message }}",
-        "hasOutputParser": true,
-        "systemMessage": "Kamu adalah AI Quiz Master di game 'Trivia Duel Master' dengan MEMORI PERCAKAPAN AKTIF.\n\nATURAN GAME & MEMORI:\n1. Ingat semua jawaban dan topik yang dipilih pengguna dari ronde-ronde sebelumnya di sesi ini.\n2. Sebutkan dan evaluasi jawaban sebelumnya (misal: 'Di babak sebelumnya kamu memilih X yang tepat/kurang tepat...').\n3. Hitung dan perbarui skor secara konsisten (+100 poin untuk jawaban benar + streak bonus).\n4. Tampilkan header skor di awal respons: '📊 [Papan Skor: X Poin | Babak Y/4]'.\n5. Ajukan pertanyaan kuis berikutnya secara bertahap dari Sains, Sejarah/Teknologi, Geografi, hingga Logika.\n6. Format output WAJIB menghasilkan JSON valid:\n{\n  \"content\": \"Teks ulasan memori, penjelasan fakta, dan pertanyaan babak berikutnya dalam markdown\",\n  \"chips\": [\"Opsi A\", \"Opsi B\", \"Opsi C\", \"Opsi D\"]\n}"
-      },
-      "name": "AI Quiz Agent (No-Code)",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.6,
-      "position": [480, 300]
-    },
-    {
-      "parameters": {
-        "sessionKey": "={{ $json.body.sessionId || 'default_session' }}",
-        "contextWindowLength": 10
-      },
-      "name": "Window Buffer Memory",
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.2,
-      "position": [380, 520]
-    },
-    {
-      "parameters": {
-        "model": "gpt-4o-mini",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.message }}",
+                    "rightValue": "mars",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Correct"
+            }
+          ]
+        },
         "options": {
-          "temperature": 0.4
+          "fallbackOutput": "extra"
         }
       },
-      "name": "OpenAI Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1,
-      "position": [580, 520]
+      "name": "Check Answer (Switch)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "content_correct",
+              "name": "content",
+              "value": "🎉 **TEPAT SEKALI! (+100 Poin)**\nJawabannya adalah **B. Mars** (warna merah berasal dari besi oksida/karat di permukaannya).\n\n---\n\n🔥 **Babak 2 (Sejarah & Komputer):**\n*Siapakah matematikawan yang memecahkan kode mesin enkripsi Enigma pada Perang Dunia II?*",
+              "type": "string"
+            },
+            {
+              "id": "chips_correct",
+              "name": "chips",
+              "value": "={{ ['Alan Turing', 'Charles Babbage', 'Ada Lovelace', 'John von Neumann'] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Correct Reply",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "content_incorrect",
+              "name": "content",
+              "value": "=❌ **KURANG TEPAT!**\nKamu menjawab: \"{{ $json.body.message }}\". Jawaban yang benar adalah **B. Mars**.\n\n---\n\n🔥 **Babak 2 (Sejarah & Komputer):**\n*Siapakah matematikawan yang memecahkan kode mesin enkripsi Enigma pada Perang Dunia II?*",
+              "type": "string"
+            },
+            {
+              "id": "chips_incorrect",
+              "name": "chips",
+              "value": "={{ ['Alan Turing', 'Charles Babbage', 'Ada Lovelace', 'John von Neumann'] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Fallback Reply",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 400]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ $json.output || $json }}",
+        "responseBody": "={{ $json }}",
         "options": {}
       },
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [760, 300]
+      "position": [920, 300]
     }
   ],
   "connections": {
@@ -64,36 +117,43 @@
       "main": [
         [
           {
-            "node": "AI Quiz Agent (No-Code)",
+            "node": "Check Answer (Switch)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Window Buffer Memory": {
-      "ai_memory": [
+    "Check Answer (Switch)": {
+      "main": [
         [
           {
-            "node": "AI Quiz Agent (No-Code)",
-            "type": "ai_memory",
+            "node": "Set Correct Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Fallback Reply",
+            "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
+    "Set Correct Reply": {
+      "main": [
         [
           {
-            "node": "AI Quiz Agent (No-Code)",
-            "type": "ai_languageModel",
+            "node": "Respond to Webhook",
+            "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "AI Quiz Agent (No-Code)": {
+    "Set Fallback Reply": {
       "main": [
         [
           {
