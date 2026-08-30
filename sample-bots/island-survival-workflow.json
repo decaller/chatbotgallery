@@ -1,5 +1,5 @@
 {
-  "name": "Island Survival Simulator Webhook",
+  "name": "Island Survival Simulator (Low-Code JS)",
   "nodes": [
     {
       "parameters": {
@@ -15,9 +15,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const message = ($json.body.message || '').toLowerCase();\nlet reply = '';\nlet chips = [];\n\nif (message.includes('kayu') || message.includes('shelter') || message.includes('teduh') || message.includes('tenda')) {\n  reply = 'Kamu berhasil mengumpulkan 8 dahan kayu kokoh dan daun palem lebar. Sebuah tenda bivak darurat selesai dibangun di bawah dinding tebing batu! (Stamina -15, Proteksi Badai +80%).';\n  chips = ['Nyalakan api unggun di depan bivak', 'Cari sumber makanan darurat', 'Istirahat sejenak pulihkan stamina'];\n} else if (message.includes('kelapa') || message.includes('air') || message.includes('makan') || message.includes('minum')) {\n  reply = 'Kamu memanjat pohon kelapa landai dan memetik 2 buah kelapa muda segar serta menemukan mata air jernih. Dahaga dan rasa laparmu teratasi! (Stamina +35, Rasa Lapar 0%).';\n  chips = ['Bangun tempat berteduh darurat', 'Buat sinyal SOS di pasir pantai', 'Eksplorasi ke dalam hutan'];\n} else if (message.includes('api') || message.includes('unggun')) {\n  reply = 'Menggunakan batu rijang dan serat sabut kelapa kering, percikan api menyala! Api unggun hangat berkobar mengusir serangga dan binatang malam.';\n  chips = ['Panggang makanan di atas api', 'Jaga api tetap menyala', 'Buat obor penjelajah'];\n} else {\n  reply = `Aksi survival: \\\"${$json.body.message}\\\". Angin laut berhembus makin kencang membawa aroma hujan badai. Keputusanmu menentukan kelangsungan hidupmu malam ini.`;\n  chips = ['Cari perlindungan di gua karang', 'Kumpulkan kayu bakar tambahan', 'Periksa barang bawaan kapal karam'];\n}\n\nreturn { json: { content: reply, chips: chips } };"
+        "jsCode": "// Minimalistic JS Action Classifier\nconst msg = ($json.body?.message || '').toLowerCase();\nconst isShelter = /kayu|shelter|tenda|teduh/.test(msg);\nconst isFood = /kelapa|air|makan|minum/.test(msg);\n\nconst content = isShelter\n  ? '🪵 Tenda bivak darurat selesai dibangun di bawah tebing batu! (Stamina -15, Proteksi Badai +80%).'\n  : isFood\n  ? '🥥 Kamu memetik 2 buah kelapa segar & meminum air mata air. (Stamina +35, Rasa Lapar 0%).'\n  : `🏝️ Aksi survival: \"${$json.body?.message}\". Badai tropis semakin mendekat ke pulau!`;\n\nconst chips = isShelter\n  ? ['Nyalakan api unggun', 'Cari makanan', 'Istirahat di tenda']\n  : isFood\n  ? ['Bangun tempat berteduh', 'Buat sinyal SOS', 'Eksplorasi hutan']\n  : ['Cari perlindungan gua', 'Kumpulkan kayu bakar', 'Periksa kapal karam'];\n\nreturn { json: { content, chips } };"
       },
-      "name": "Survival Simulation Logic",
+      "name": "Quick JS Action Filter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [480, 300]
@@ -36,9 +36,9 @@
   ],
   "connections": {
     "Webhook": {
-      "main": [[{ "node": "Survival Simulation Logic", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Quick JS Action Filter", "type": "main", "index": 0 }]]
     },
-    "Survival Simulation Logic": {
+    "Quick JS Action Filter": {
       "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
     }
   }

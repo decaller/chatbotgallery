@@ -1,5 +1,5 @@
 {
-  "name": "Cyberpunk Noir 2088 Webhook",
+  "name": "Cyberpunk Noir 2088 (Python Engine)",
   "nodes": [
     {
       "parameters": {
@@ -15,9 +15,10 @@
     },
     {
       "parameters": {
-        "jsCode": "const message = ($json.body.message || '').toLowerCase();\nlet reply = '';\nlet chips = [];\n\nif (message.includes('pindai') || message.includes('chip') || message.includes('korban')) {\n  reply = 'Scanner cybernetic-mu berbunyi berdengung. Chip memori korban sengaja dibakar dengan EMP sesaat sebelum tewas, namun partisi data cadangan memuat kode terenkripsi: **\\\"PROJECT_EVE - SUB-LEVEL 4\\\"**.';\n  chips = ['Dekripsi data PROJECT_EVE', 'Tanyakan PROJECT_EVE ke Android K-9', 'Cari sumber EMP di ruangan'];\n} else if (message.includes('interogasi') || message.includes('android') || message.includes('k-9')) {\n  reply = 'Android K-9 menatapmu dengan iris optik berkedip kuning: *\\\"Saya tidak melihat sosok penyerang, Detektif. Protokol keamanan penthouse di-override dari jarak jauh via subnet internal pada pukul 23:14.\\\"*';\n  chips = ['Lacak subnet internal', 'Uji apakah AI berbohong', 'Minta log akses 24 jam'];\n} else {\n  reply = `Detektif Vane menindaklanjuti petunjuk: \\\"${$json.body.message}\\\". Kamu menemukan puntung rokok ilegal beraroma vanila neon di ventilasi pendingin.`;\n  chips = ['Kirim sampel ke lab forensik', 'Kejar jejak ke balkon', 'Interogasi security gedung'];\n}\n\nreturn { json: { content: reply, chips: chips } };"
+        "language": "python",
+        "pythonCode": "# Python Forensic Text & Clue Analyzer\nimport re\n\nbody = _input.first().json.get('body', {})\nmessage = str(body.get('message', '')).lower()\n\n# Forensic regex pattern matching\nif re.search(r'(pindai|chip|scanner|korban)', message):\n    reply = '🔍 **Analisis Forensik (Python Engine)**: Scanner cybernetic menemukan partisi memori terenkripsi: **`PROJECT_EVE - SUB-LEVEL 4`**.'\n    chips = ['Dekripsi data PROJECT_EVE', 'Tanyakan PROJECT_EVE ke Android K-9', 'Cari sumber EMP di penthouse']\nelif re.search(r'(interogasi|android|k-9)', message):\n    reply = '🤖 Android K-9 menatapmu dengan iris kuning: *\"Protokol keamanan penthouse di-override dari jarak jauh via subnet internal pada pukul 23:14.\"*'\n    chips = ['Lacak jejak subnet internal', 'Uji apakah AI berbohong', 'Minta log akses 24 jam']\nelse:\n    reply = f'🕵️‍♂️ Detektif Vane menindaklanjuti petunjuk: \"{body.get(\"message\", \"\")}\". Ditemukan puntung rokok ilegal beraroma vanila neon di ventilasi pendingin!'\n    chips = ['Kirim sampel ke lab forensik', 'Kejar jejak ke balkon luar', 'Interogasi security gedung']\n\nreturn [{'json': {'content': reply, 'chips': chips}}]"
       },
-      "name": "Investigation Logic",
+      "name": "Python Clue Analyzer",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [480, 300]
@@ -36,9 +37,9 @@
   ],
   "connections": {
     "Webhook": {
-      "main": [[{ "node": "Investigation Logic", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Python Clue Analyzer", "type": "main", "index": 0 }]]
     },
-    "Investigation Logic": {
+    "Python Clue Analyzer": {
       "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
     }
   }

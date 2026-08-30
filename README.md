@@ -47,15 +47,15 @@ chatBotGallery/
 
 ## 🎮 Sample Bots
 
-We have created 5 sample bots configured with visual palettes, avatars, initial chips, and simulated game engines:
+We have created 5 sample bots featuring diverse workflow implementation models and complexity tiers:
 
-| Bot Name | Category | Description |
-| :--- | :--- | :--- |
-| **Dungeon & Shadow Quest** | `RPG & Gaming` | Interactive dungeon crawler AI Game Master in the labyrinth of Valdorath with branching choices and inventory tracking. |
-| **Cyberpunk Noir 2088** | `RPG & Gaming` | Detective mystery in Neo-Jakarta with forensic scanning, android witness interrogation, and conspiracy clues. |
-| **Island 404: Survival** | `Productivity / RPG` | Text survival simulator with stamina management, weather hazards, and bivouac crafting. |
-| **CodeCraft Senior Mentor** | `Coding & Dev` | AI Senior Software Architect for code reviews, clean code, design patterns, and debugging. |
-| **Trivia Duel Master** | `Education` | Interactive trivia quiz with real-time scoring, multi-choice chips, and general knowledge questions. |
+| Bot Name | Category | Implementation Type | Description |
+| :--- | :--- | :--- | :--- |
+| **Dungeon & Shadow Quest** | `RPG & Gaming` | **No-Code AI Agent** (Zero Code) | Pure n8n LangChain AI Agent node connected to an OpenAI Chat Model without custom scripts. |
+| **Cyberpunk Noir 2088** | `RPG & Gaming` | **Python Engine** (n8n Python) | Uses n8n Code node in Python runtime for regex clue matching and forensic text analysis. |
+| **Island 404: Survival** | `Productivity / RPG` | **Low-Code JS** (A bit of JS) | Minimalistic 5-line JavaScript filter classifying survival actions, stamina, and weather threats. |
+| **Trivia Duel Master** | `Education` | **No-Code Rule Engine** (Zero Code) | Pure n8n `Switch` (condition routing) and `Set` nodes without writing any code. |
+| **CodeCraft Senior Mentor** | `Coding & Dev` | **JavaScript Engine** (Standard JS) | Full JavaScript logic providing TypeScript/React code reviews, refactoring, and SOLID design advice. |
 
 ---
 
