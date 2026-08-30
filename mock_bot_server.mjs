@@ -141,16 +141,28 @@ const BOT_HANDLERS = {
 
   "trivia-duel": (message) => {
     const lower = (message || "").toLowerCase()
-    if (lower.includes("mars") || lower.includes("b.") || lower.includes("b")) {
+    if (lower.includes("mars") || lower.includes("b.") || lower === "b") {
       return {
         content:
-          "🎉 **TEPAT SEKALI! (+100 Poin)**\nJawabannya adalah **B. Mars** (warna merah berasal dari besi oksida/karat di permukaannya).\n\n---\n\n🔥 **Babak 2 (Sejarah & Komputer):**\n*Siapakah matematikawan yang memecahkan kode mesin enkripsi Enigma pada Perang Dunia II?*",
+          "🎉 **TEPAT SEKALI! (+100 Poin | Total: 100 Poin)**\nJawabannya adalah **B. Mars** (warna merah berasal dari besi oksida di permukaannya).\n\n---\n\n🔥 **Babak 2 (Sejarah & Komputer):**\n*Siapakah tokoh matematikawan yang memecahkan kode mesin enkripsi Enigma pada Perang Dunia II?*",
         chips: ["Alan Turing", "Charles Babbage", "Ada Lovelace", "John von Neumann"],
+      }
+    } else if (lower.includes("turing") || lower.includes("alan")) {
+      return {
+        content:
+          "🏆 **LUAR BIASA BENAR! (+100 Poin | Total: 200 Poin)**\n**Alan Turing** memimpin pemecahan kode Enigma di Bletchley Park menggunakan mesin elektromekanis Bombe!\n\n---\n\n🔥 **Babak 3 (Geografi Dunia):**\n*Danau terdalam di dunia yang menampung 20% cadangan air tawar permukaan bumi yang tak beku adalah?*",
+        chips: ["Danau Baikal", "Danau Toba", "Danau Victoria", "Danau Superior"],
+      }
+    } else if (lower.includes("baikal")) {
+      return {
+        content:
+          "👑 **SEMPURNA! (+100 Poin | Total Skor Akhir: 300 Poin)**\n**Danau Baikal** di Siberia, Rusia memiliki kedalaman 1.642 meter.\n\n---\n\n🏁 **DUEL SELESAI!**\nSelamat, kamu berhasil menjawab semua tantangan kuis dengan benar dan meraih gelar **🏆 Grand Quiz Champion**!",
+        chips: ["🔄 Main Lagi dari Babak 1", "📜 Lihat Peringkat", "🎮 Coba Bot Lain"],
       }
     } else {
       return {
-        content: `❌ **KURANG TEPAT!**\nKamu menjawab: "${message}". Jawaban yang benar adalah **B. Mars**.\n\n---\n\n🔥 **Babak 2 (Sejarah & Komputer):**\n*Siapakah matematikawan yang memecahkan kode mesin enkripsi Enigma pada Perang Dunia II?*`,
-        chips: ["Alan Turing", "Charles Babbage", "Ada Lovelace", "John von Neumann"],
+        content: `Jawaban/respons tercatat: *"${message}"*.\n\nSilakan pilih jawaban atau mulai dari Babak 1:\n*Planet manakah di tata surya kita yang memiliki julukan Planet Merah?*`,
+        chips: ["A. Venus", "B. Mars", "C. Jupiter", "D. Merkurius"],
       }
     }
   },
